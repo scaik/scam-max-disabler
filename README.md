@@ -1,13 +1,9 @@
 # скаМ — Сломайте Макс
 
 <p align="center">
-  <img src="docs/images/img_1.jpg" alt="Сделайте MAX нерабочим" width="100%"/>
-</p>
-<p align="center">
-  <img src="docs/images/img_2.jpg" alt="Переустановка не поможет" width="100%"/>
-</p>
-<p align="center">
-  <img src="docs/images/img_3.jpg" alt="скаМ не работает даже на парковке" width="100%"/>
+  <img src="docs/images/img_1.jpg" alt="Сделайте MAX нерабочим" width="250"/>
+  <img src="docs/images/img_2.jpg" alt="Переустановка не поможет" width="250"/>
+  <img src="docs/images/img_3.jpg" alt="скаМ не работает даже на парковке" width="250"/>
 </p>
 
 Победите требование «установить Max», убедительно показывая, что он «не работает» на вашем устройстве.
