@@ -12,6 +12,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -28,6 +29,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ru.scaik.scammaxdisabler.ui.theme.ScamMaxDisablerTheme
@@ -120,7 +122,11 @@ fun MainScreen(context: Context) {
             Image(
                 painter = painterResource(id = R.drawable.logo),
                 contentDescription = "App logo",
-                modifier = Modifier.height(260.dp)
+                modifier = Modifier
+                    .fillMaxWidth(0.7f)
+                    .heightIn(max = 140.dp),
+                contentScale = ContentScale.Crop,
+                alignment = Alignment.Center
             )
 
             if (!hasAccessibility) {
@@ -146,6 +152,12 @@ fun MainScreen(context: Context) {
                             color = Color.Black,
                             fontSize = 14.sp
                         )
+                        Spacer(modifier = Modifier.height(6.dp))
+                        Text(
+                            text = "Если переключатель недоступен (Android 13+):\n1) Откройте настройки приложения\n2) Включите ‘Разрешить ограниченные настройки’\n3) Вернитесь и включите службу в ‘Спец. возможности’.",
+                            color = Color.Black,
+                            fontSize = 13.sp
+                        )
                         Spacer(modifier = Modifier.height(8.dp))
                         TextButton(
                             onClick = {
@@ -157,6 +169,19 @@ fun MainScreen(context: Context) {
                             shape = RoundedCornerShape(8.dp)
                         ) {
                             Text(text = "Открыть «Спец. возможности»")
+                        }
+                        Spacer(modifier = Modifier.height(4.dp))
+                        TextButton(
+                            onClick = {
+                                val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                                    data = Uri.parse("package:" + context.packageName)
+                                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                }
+                                context.startActivity(intent)
+                            },
+                            shape = RoundedCornerShape(8.dp)
+                        ) {
+                            Text(text = "Открыть настройки приложения")
                         }
                     }
                 }
