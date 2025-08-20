@@ -9,6 +9,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.foundation.layout.*
@@ -21,12 +22,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ru.scaik.scammaxdisabler.ui.theme.ScamMaxDisablerTheme
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
+import androidx.compose.ui.platform.LocalUriHandler
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -49,6 +52,7 @@ fun MainScreen(context: Context) {
     } else {
         listOf(Color(0xFF00D4FF), Color(0xFF6A00FF))
     }
+    val uriHandler = LocalUriHandler.current
 
     // Update permission state when returning from Settings
     val lifecycleOwner = context as? LifecycleOwner
@@ -165,6 +169,17 @@ fun MainScreen(context: Context) {
                     color = Color.White
                 )
             }
+
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = "Как скрыть приложение?",
+                fontSize = 12.sp,
+                color = Color.White.copy(alpha = 0.9f),
+                textDecoration = TextDecoration.Underline,
+                modifier = Modifier.clickable {
+                    uriHandler.openUri("https://hi-tech.mail.ru/review/55973-kak-skryt-lyuboe-prilozhenie-na-android/")
+                }
+            )
 
             Spacer(modifier = Modifier.height(120.dp))
         }
