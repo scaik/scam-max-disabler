@@ -3,6 +3,9 @@ package ru.scaik.scammaxdisabler
 import android.content.Context
 import android.os.Bundle
 import android.content.Intent
+import android.content.ComponentName
+import android.net.Uri
+import android.os.Build
 import android.provider.Settings
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -10,6 +13,8 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.foundation.layout.*
@@ -47,12 +52,20 @@ class MainActivity : ComponentActivity() {
 fun MainScreen(context: Context) {
     var isOn by remember { mutableStateOf(Prefs.isBlockerEnabled(context)) }
     var hasAccessibility by remember { mutableStateOf(checkAccessibilityPermission(context)) }
+    var hasOverlay by remember { mutableStateOf(checkOverlayPermission(context)) }
     val gradientColors = if (isOn) {
         listOf(Color(0xFF000000), Color(0xFFF60000))
     } else {
         listOf(Color(0xFF00D4FF), Color(0xFF6A00FF))
     }
     val uriHandler = LocalUriHandler.current
+    val canToggle = hasAccessibility && hasOverlay
+    val toggleIfAllowed: () -> Unit = {
+        if (canToggle) {
+            isOn = !isOn
+            Prefs.setBlockerEnabled(context, isOn)
+        }
+    }
 
     // Update permission state when returning from Settings
     val lifecycleOwner = context as? LifecycleOwner
@@ -61,6 +74,7 @@ fun MainScreen(context: Context) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) {
                 hasAccessibility = checkAccessibilityPermission(context)
+                hasOverlay = checkOverlayPermission(context)
                 if (!hasAccessibility) {
                     isOn = false
                     Prefs.setBlockerEnabled(context, false)
@@ -92,11 +106,15 @@ fun MainScreen(context: Context) {
                     )
                 )
             }
+            .then(if (canToggle) Modifier.clickable { toggleIfAllowed() } else Modifier)
     ) {
+        val scrollState = rememberScrollState()
         Column(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(top = 24.dp, start = 16.dp, end = 16.dp),
+                .align(Alignment.TopCenter)
+                .fillMaxWidth()
+                .padding(top = 24.dp, start = 16.dp, end = 16.dp)
+                .verticalScroll(scrollState),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Image(
@@ -106,7 +124,7 @@ fun MainScreen(context: Context) {
             )
 
             if (!hasAccessibility) {
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(4.dp))
                 Card(
                     shape = RoundedCornerShape(12.dp),
                     colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.9f)),
@@ -124,7 +142,7 @@ fun MainScreen(context: Context) {
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
-                            text = "Откройте настройки и включите службу спец. возможностей приложения.",
+                            text = "В «Спец. возможности» откройте «Скачанные приложения», выберите «скаМ» и включите доступ.",
                             color = Color.Black,
                             fontSize = 14.sp
                         )
@@ -138,39 +156,84 @@ fun MainScreen(context: Context) {
                             },
                             shape = RoundedCornerShape(8.dp)
                         ) {
-                            Text(text = "Открыть настройки")
+                            Text(text = "Открыть «Спец. возможности»")
                         }
                     }
                 }
-            } else {
-                Spacer(modifier = Modifier.height(24.dp))
             }
 
-            Spacer(modifier = Modifier.weight(1f))
+            if (!hasOverlay) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Card(
+                    shape = RoundedCornerShape(12.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.9f)),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
+                ) {
+                    Column(
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = "⚠ Разрешение: показывать поверх других окон",
+                            color = Color(0xFFB00020),
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 16.sp
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = "Откройте «Показ поверх других окон», выберите «скаМ» и разрешите показ.",
+                            color = Color.Black,
+                            fontSize = 14.sp
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        TextButton(
+                            onClick = {
+                                val intent = Intent(
+                                    Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                                    Uri.parse("package:" + context.packageName)
+                                ).apply { addFlags(Intent.FLAG_ACTIVITY_NEW_TASK) }
+                                context.startActivity(intent)
+                            },
+                            shape = RoundedCornerShape(8.dp)
+                        ) {
+                            Text(text = "Открыть настройки показа поверх")
+                        }
+                    }
+                }
+            }
 
-            val buttonContainerColor = if (isOn) Color(0xFFD32F2F) else Color(0xFF512DA8)
-            Button(
-                onClick = {
-                    isOn = !isOn
-                    Prefs.setBlockerEnabled(context, isOn)
-                },
-                enabled = hasAccessibility,
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = buttonContainerColor
-                ),
-                shape = RoundedCornerShape(16.dp),
-                modifier = Modifier
-                    .width(240.dp)
-                    .height(72.dp)
-            ) {
+            if (hasAccessibility && hasOverlay) {
+                Spacer(modifier = Modifier.height(24.dp))
+            }
+        }
+
+        Column(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(bottom = 96.dp)
+                .padding(start = 16.dp, end = 16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            if (canToggle) {
+                val statusTextColor = Color.White
                 Text(
-                    text = if (isOn) "ВЫКЛЮЧИТЬ" else "ВКЛЮЧИТЬ",
-                    fontSize = 22.sp,
+                    text = if (isOn) "Включено" else "Выключено",
+                    fontSize = 26.sp,
+                    color = statusTextColor,
+                    fontWeight = FontWeight.SemiBold
+                )
+
+                Spacer(modifier = Modifier.height(6.dp))
+
+                val toggleLabel = if (isOn) "Нажмите, чтобы выключить" else "Нажмите, чтобы включить"
+                Text(
+                    text = toggleLabel,
+                    fontSize = 16.sp,
                     color = Color.White
                 )
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(24.dp))
             Text(
                 text = "Как скрыть приложение?",
                 fontSize = 12.sp,
@@ -180,20 +243,26 @@ fun MainScreen(context: Context) {
                     uriHandler.openUri("https://hi-tech.mail.ru/review/55973-kak-skryt-lyuboe-prilozhenie-na-android/")
                 }
             )
-
-            Spacer(modifier = Modifier.height(120.dp))
         }
     }
 }
 
 fun checkAccessibilityPermission(context: Context): Boolean {
-    val accessibilityEnabled = try {
-        Settings.Secure.getInt(
-            context.contentResolver,
-            Settings.Secure.ACCESSIBILITY_ENABLED
-        )
-    } catch (e: Settings.SettingNotFoundException) {
-        0
-    }
-    return accessibilityEnabled == 1
+    val resolver = context.contentResolver
+    val enabledServices = Settings.Secure.getString(
+        resolver,
+        Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES
+    ) ?: ""
+
+    val component = ComponentName(context, AppMonitorService::class.java)
+    val fullId = component.flattenToString() // ru.scaik.scammaxdisabler/ru.scaik.scammaxdisabler.AppMonitorService
+    val shortId = "${context.packageName}/.AppMonitorService" // ru.scaik.scammaxdisabler/.AppMonitorService (на некоторых прошивках)
+
+    return enabledServices.split(':').any { it == fullId || it == shortId }
+}
+
+fun checkOverlayPermission(context: Context): Boolean {
+    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+        Settings.canDrawOverlays(context)
+    } else true
 }
