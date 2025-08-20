@@ -36,7 +36,7 @@ class AppMonitorService : AccessibilityService() {
     private fun showFakeCrashDialog() {
         val dialogBuilder =
             AlertDialog.Builder(this, android.R.style.Theme_DeviceDefault_Dialog_Alert)
-                .setTitle("В приложении \"Max\" произошла ошибка")
+                .setTitle("В приложении \"MAX\" произошла ошибка")
                 .setPositiveButton("Закрыть приложение") { _, _ ->
                     performGlobalAction(GLOBAL_ACTION_HOME)
                 }
