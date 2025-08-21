@@ -2,6 +2,6 @@
 <accessibility-service xmlns:android="http://schemas.android.com/apk/res/android"
     android:accessibilityEventTypes="typeWindowStateChanged"
     android:accessibilityFeedbackType="feedbackGeneric"
-    android:canRetrieveWindowContent="true"
+    android:canRetrieveWindowContent="false"
     android:notificationTimeout="100"
     android:packageNames="ru.oneme.app" />
