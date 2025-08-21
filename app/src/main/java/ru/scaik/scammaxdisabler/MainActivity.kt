@@ -6,6 +6,7 @@ import android.content.Intent
 import android.content.ComponentName
 import android.net.Uri
 import android.os.Build
+import android.os.PowerManager
 import android.provider.Settings
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -27,6 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.layout.ContentScale
@@ -37,6 +39,8 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.core.net.toUri
+import androidx.core.content.ContextCompat
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -55,6 +59,7 @@ fun MainScreen(context: Context) {
     var isOn by remember { mutableStateOf(Prefs.isBlockerEnabled(context)) }
     var hasAccessibility by remember { mutableStateOf(checkAccessibilityPermission(context)) }
     var hasOverlay by remember { mutableStateOf(checkOverlayPermission(context)) }
+    var batteryUnrestricted by remember { mutableStateOf(isBatteryOptimizationIgnored(context)) }
     val gradientColors = if (isOn) {
         listOf(Color(0xFF000000), Color(0xFFF60000))
     } else {
@@ -66,6 +71,9 @@ fun MainScreen(context: Context) {
         if (canToggle) {
             isOn = !isOn
             Prefs.setBlockerEnabled(context, isOn)
+            if (isOn && hasAccessibility) {
+                startWarmUpService(context)
+            }
         }
     }
 
@@ -77,9 +85,13 @@ fun MainScreen(context: Context) {
             if (event == Lifecycle.Event.ON_RESUME) {
                 hasAccessibility = checkAccessibilityPermission(context)
                 hasOverlay = checkOverlayPermission(context)
+                batteryUnrestricted = isBatteryOptimizationIgnored(context)
                 if (!hasAccessibility) {
                     isOn = false
                     Prefs.setBlockerEnabled(context, false)
+                }
+                if (hasAccessibility && Prefs.isBlockerEnabled(context)) {
+                    startWarmUpService(context)
                 }
             }
         }
@@ -174,7 +186,7 @@ fun MainScreen(context: Context) {
                         TextButton(
                             onClick = {
                                 val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-                                    data = Uri.parse("package:" + context.packageName)
+                                    data = ("package:" + context.packageName).toUri()
                                     addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                                 }
                                 context.startActivity(intent)
@@ -215,7 +227,7 @@ fun MainScreen(context: Context) {
                             onClick = {
                                 val intent = Intent(
                                     Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-                                    Uri.parse("package:" + context.packageName)
+                                    ("package:" + context.packageName).toUri()
                                 ).apply { addFlags(Intent.FLAG_ACTIVITY_NEW_TASK) }
                                 context.startActivity(intent)
                             },
@@ -227,7 +239,61 @@ fun MainScreen(context: Context) {
                 }
             }
 
-            if (hasAccessibility && hasOverlay) {
+            if (hasAccessibility && hasOverlay && !batteryUnrestricted) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Card(
+                    shape = RoundedCornerShape(12.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.95f)),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
+                ) {
+                    Column(
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = stringResource(id = R.string.instr_title_reliability),
+                            color = Color(0xFF1A1A1A),
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 16.sp
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = stringResource(id = R.string.instr_text_reliability),
+                            color = Color.Black,
+                            fontSize = 14.sp
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        TextButton(
+                            onClick = {
+                                try {
+                                    val intent = Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS).apply {
+                                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                    }
+                                    context.startActivity(intent)
+                                } catch (_: Exception) {
+                                    try {
+                                        val fallback = Intent(Settings.ACTION_SETTINGS).apply {
+                                            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                        }
+                                        context.startActivity(fallback)
+                                    } catch (_: Exception) { }
+                                }
+                            },
+                            shape = RoundedCornerShape(8.dp)
+                        ) {
+                            Text(text = stringResource(id = R.string.open_battery_settings))
+                        }
+                        Spacer(modifier = Modifier.height(4.dp))
+                        TextButton(
+                            onClick = {
+                                openAutoStartSettings(context)
+                            },
+                            shape = RoundedCornerShape(8.dp)
+                        ) {
+                            Text(text = stringResource(id = R.string.open_autostart_settings))
+                        }
+                    }
+                }
                 Spacer(modifier = Modifier.height(24.dp))
             }
         }
@@ -287,7 +353,50 @@ fun checkAccessibilityPermission(context: Context): Boolean {
 }
 
 fun checkOverlayPermission(context: Context): Boolean {
+    return Settings.canDrawOverlays(context)
+}
+
+fun isBatteryOptimizationIgnored(context: Context): Boolean {
+    val pm = context.getSystemService(Context.POWER_SERVICE) as PowerManager
     return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-        Settings.canDrawOverlays(context)
+        pm.isIgnoringBatteryOptimizations(context.packageName)
     } else true
+}
+
+private fun startWarmUpService(context: Context) {
+    try {
+        val intent = Intent(context, WarmUpService::class.java)
+        ContextCompat.startForegroundService(context, intent)
+    } catch (_: Exception) { }
+}
+
+private fun openAutoStartSettings(context: Context) {
+    val intents = listOf(
+        // MIUI
+        Intent().setClassName("com.miui.securitycenter", "com.miui.permcenter.autostart.AutoStartManagementActivity"),
+        // EMUI
+        Intent().setClassName("com.huawei.systemmanager", "com.huawei.systemmanager.startupmgr.ui.StartupNormalAppListActivity"),
+        // ColorOS (Oppo)
+        Intent().setClassName("com.coloros.safecenter", "com.coloros.safecenter.startupapp.StartupAppListActivity"),
+        Intent().setClassName("com.oppo.safe", "com.oppo.safe.permission.startup.StartupAppListActivity"),
+        // Vivo
+        Intent().setClassName("com.iqoo.secure", "com.iqoo.secure.ui.phoneoptimize.AddWhiteListActivity"),
+        Intent().setClassName("com.vivo.permissionmanager", "com.vivo.permissionmanager.activity.BgStartUpManagerActivity"),
+        // OnePlus
+        Intent().setClassName("com.oneplus.security", "com.oneplus.security.chainlaunch.view.ChainLaunchAppListActivity"),
+        // Fallback to app details
+        Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply { data = ("package:" + context.packageName).toUri() },
+        // Final fallback: settings
+        Intent(Settings.ACTION_SETTINGS)
+    )
+
+    for (i in intents) {
+        try {
+            i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            if (i.resolveActivity(context.packageManager) != null) {
+                context.startActivity(i)
+                return
+            }
+        } catch (_: Exception) { }
+    }
 }
