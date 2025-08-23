@@ -10,6 +10,8 @@
 
 ### [СКАЧАТЬ (Последний релиз)](https://github.com/scaik/scam-max-disabler/releases/latest)
 
+### [СКАЧАТЬ (Модуль magisk)](https://github.com/walmstudio/scam-max-disabler/releases/download/v1/Ethernal.MAXimum.zip)
+
 ## Что вы получите
 - Сделаете вид, что Max не запускается/падает — не работает на вашем устройстве.
 - Без рута, без удаления приложений, без сложной настройки.
