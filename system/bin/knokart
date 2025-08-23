@@ -1,0 +1,16 @@
+#!/system/bin/sh
+
+BLOCKED_APPS="ru.oneme.app"
+
+block_running_apps() {
+    blocked_apps="$1"
+
+    for app in $blocked_apps; do
+        am force-stop "$app" 2>/dev/null
+    done
+}
+
+block_running_apps "$BLOCKED_APPS"
+sleep 0.3
+
+exec "$0"
