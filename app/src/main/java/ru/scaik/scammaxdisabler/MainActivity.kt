@@ -1,12 +1,10 @@
 package ru.scaik.scammaxdisabler
 
 import android.content.Context
-import android.os.Bundle
 import android.content.Intent
-import android.content.ComponentName
 import android.net.Uri
 import android.os.Build
-import android.os.PowerManager
+import android.os.Bundle
 import android.provider.Settings
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -15,32 +13,35 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import ru.scaik.scammaxdisabler.ui.theme.ScamMaxDisablerTheme
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
-import androidx.compose.ui.platform.LocalUriHandler
-import androidx.core.net.toUri
-import androidx.core.content.ContextCompat
+import ru.scaik.scammaxdisabler.R
+import ru.scaik.scammaxdisabler.domain.AppState
+import ru.scaik.scammaxdisabler.domain.PermissionValidator
+import ru.scaik.scammaxdisabler.domain.ServiceRunner
+import ru.scaik.scammaxdisabler.domain.StateCoordinator
+import ru.scaik.scammaxdisabler.ui.theme.ScamMaxDisablerTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -56,43 +57,19 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun MainScreen(context: Context) {
-    var isOn by remember { mutableStateOf(Prefs.isBlockerEnabled(context)) }
-    var hasAccessibility by remember { mutableStateOf(checkAccessibilityPermission(context)) }
-    var hasOverlay by remember { mutableStateOf(checkOverlayPermission(context)) }
-    var batteryUnrestricted by remember { mutableStateOf(isBatteryOptimizationIgnored(context)) }
-    val gradientColors = if (isOn) {
-        listOf(Color(0xFF000000), Color(0xFFF60000))
-    } else {
-        listOf(Color(0xFF00D4FF), Color(0xFF6A00FF))
-    }
-    val uriHandler = LocalUriHandler.current
-    val canToggle = hasAccessibility && hasOverlay
-    val toggleIfAllowed: () -> Unit = {
-        if (canToggle) {
-            isOn = !isOn
-            Prefs.setBlockerEnabled(context, isOn)
-            if (isOn && hasAccessibility) {
-                startWarmUpService(context)
-            }
-        }
+    val coordinator = remember { StateCoordinator(context) }
+    val state by coordinator.state.collectAsState()
+
+    LaunchedEffect(Unit) {
+        coordinator.initialize()
     }
 
-    // Update permission state when returning from Settings
     val lifecycleOwner = context as? LifecycleOwner
     DisposableEffect(lifecycleOwner) {
         if (lifecycleOwner == null) return@DisposableEffect onDispose { }
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) {
-                hasAccessibility = checkAccessibilityPermission(context)
-                hasOverlay = checkOverlayPermission(context)
-                batteryUnrestricted = isBatteryOptimizationIgnored(context)
-                if (!hasAccessibility) {
-                    isOn = false
-                    Prefs.setBlockerEnabled(context, false)
-                }
-                if (hasAccessibility && Prefs.isBlockerEnabled(context)) {
-                    startWarmUpService(context)
-                }
+                coordinator.refreshState()
             }
         }
         lifecycleOwner.lifecycle.addObserver(observer)
@@ -101,12 +78,13 @@ fun MainScreen(context: Context) {
         }
     }
 
-    LaunchedEffect(hasAccessibility) {
-        if (!hasAccessibility && isOn) {
-            isOn = false
-            Prefs.setBlockerEnabled(context, false)
-        }
+    val gradientColors = if (state.blockerEnabled) {
+        listOf(Color(0xFF000000), Color(0xFFF60000))
+    } else {
+        listOf(Color(0xFF00D4FF), Color(0xFF6A00FF))
     }
+
+    val uriHandler = LocalUriHandler.current
 
     Box(
         modifier = Modifier
@@ -115,216 +93,86 @@ fun MainScreen(context: Context) {
                 drawRect(
                     brush = Brush.linearGradient(
                         colors = gradientColors,
-                        start = Offset(size.width, 0f), // top-right
-                        end = Offset(0f, size.height)   // bottom-left
+                        start = Offset(size.width, 0f),
+                        end = Offset(0f, size.height)
                     )
                 )
             }
-            .then(if (canToggle) Modifier.clickable { toggleIfAllowed() } else Modifier)
     ) {
-        val scrollState = rememberScrollState()
         Column(
             modifier = Modifier
-                .align(Alignment.TopCenter)
-                .fillMaxWidth()
-                .padding(top = 24.dp, start = 16.dp, end = 16.dp)
-                .verticalScroll(scrollState),
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            Spacer(modifier = Modifier.height(64.dp))
+
             Image(
-                painter = painterResource(id = R.drawable.logo),
-                contentDescription = "App logo",
-                modifier = Modifier
-                    .fillMaxWidth(0.7f)
-                    .heightIn(max = 140.dp),
-                contentScale = ContentScale.Crop,
-                alignment = Alignment.Center
+                painter = painterResource(id = R.mipmap.ic_launcher),
+                contentDescription = null,
+                modifier = Modifier.size(120.dp),
+                contentScale = ContentScale.Fit
             )
 
-            if (!hasAccessibility) {
-                Spacer(modifier = Modifier.height(4.dp))
-                Card(
-                    shape = RoundedCornerShape(12.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.9f)),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
-                ) {
-                    Column(
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text(
-                            text = "⚠ Требуется разрешение: спец. возможности",
-                            color = Color(0xFFB00020),
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 16.sp
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = "В «Спец. возможности» откройте «Скачанные приложения», выберите «скаМ» и включите доступ.",
-                            color = Color.Black,
-                            fontSize = 14.sp
-                        )
-                        Spacer(modifier = Modifier.height(6.dp))
-                        Text(
-                            text = "Если переключатель недоступен (Android 13+):\n1) Откройте настройки приложения\n2) Включите ‘Разрешить ограниченные настройки’\n3) Вернитесь и включите службу в ‘Спец. возможности’.",
-                            color = Color.Black,
-                            fontSize = 13.sp
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        TextButton(
-                            onClick = {
-                                val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS).apply {
-                                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                                }
-                                context.startActivity(intent)
-                            },
-                            shape = RoundedCornerShape(8.dp)
-                        ) {
-                            Text(text = "Открыть «Спец. возможности»")
-                        }
-                        Spacer(modifier = Modifier.height(4.dp))
-                        TextButton(
-                            onClick = {
-                                val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-                                    data = ("package:" + context.packageName).toUri()
-                                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                                }
-                                context.startActivity(intent)
-                            },
-                            shape = RoundedCornerShape(8.dp)
-                        ) {
-                            Text(text = "Открыть настройки приложения")
-                        }
-                    }
-                }
+            Spacer(modifier = Modifier.height(24.dp))
+
+            Text(
+                text = stringResource(id = R.string.app_name),
+                fontSize = 28.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.White
+            )
+
+            Spacer(modifier = Modifier.height(40.dp))
+
+            if (!state.accessibilityGranted) {
+                PermissionCard(
+                    title = stringResource(id = R.string.instr_title_accessibility),
+                    text = stringResource(id = R.string.instr_text_accessibility),
+                    buttonText = stringResource(id = R.string.open_accessibility_settings),
+                    onClick = { openAccessibilitySettings(context) }
+                )
+                Spacer(modifier = Modifier.height(8.dp))
             }
 
-            if (!hasOverlay) {
+            if (!state.overlayGranted) {
+                PermissionCard(
+                    title = stringResource(id = R.string.instr_title_overlay),
+                    text = stringResource(id = R.string.instr_text_overlay),
+                    buttonText = stringResource(id = R.string.open_overlay_settings),
+                    onClick = { openOverlaySettings(context) }
+                )
                 Spacer(modifier = Modifier.height(8.dp))
-                Card(
-                    shape = RoundedCornerShape(12.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.9f)),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
-                ) {
-                    Column(
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text(
-                            text = "⚠ Разрешение: показывать поверх других окон",
-                            color = Color(0xFFB00020),
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 16.sp
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = "Откройте «Показ поверх других окон», выберите «скаМ» и разрешите показ.",
-                            color = Color.Black,
-                            fontSize = 14.sp
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        TextButton(
-                            onClick = {
-                                val intent = Intent(
-                                    Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-                                    ("package:" + context.packageName).toUri()
-                                ).apply { addFlags(Intent.FLAG_ACTIVITY_NEW_TASK) }
-                                context.startActivity(intent)
-                            },
-                            shape = RoundedCornerShape(8.dp)
-                        ) {
-                            Text(text = "Открыть настройки показа поверх")
-                        }
-                    }
-                }
             }
 
-            if (hasAccessibility && hasOverlay && !batteryUnrestricted) {
-                Spacer(modifier = Modifier.height(8.dp))
-                Card(
-                    shape = RoundedCornerShape(12.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.95f)),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
-                ) {
-                    Column(
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text(
-                            text = stringResource(id = R.string.instr_title_reliability),
-                            color = Color(0xFF1A1A1A),
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 16.sp
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = stringResource(id = R.string.instr_text_reliability),
-                            color = Color.Black,
-                            fontSize = 14.sp
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        TextButton(
-                            onClick = {
-                                try {
-                                    val intent = Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS).apply {
-                                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                                    }
-                                    context.startActivity(intent)
-                                } catch (_: Exception) {
-                                    try {
-                                        val fallback = Intent(Settings.ACTION_SETTINGS).apply {
-                                            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                                        }
-                                        context.startActivity(fallback)
-                                    } catch (_: Exception) { }
-                                }
-                            },
-                            shape = RoundedCornerShape(8.dp)
-                        ) {
-                            Text(text = stringResource(id = R.string.open_battery_settings))
-                        }
-                        Spacer(modifier = Modifier.height(4.dp))
-                        TextButton(
-                            onClick = {
-                                openAutoStartSettings(context)
-                            },
-                            shape = RoundedCornerShape(8.dp)
-                        ) {
-                            Text(text = stringResource(id = R.string.open_autostart_settings))
-                        }
-                    }
-                }
+            if (state.allPermissionsGranted && !state.batteryExempted) {
+                PermissionCard(
+                    title = stringResource(id = R.string.instr_title_reliability),
+                    text = stringResource(id = R.string.instr_text_reliability),
+                    buttonText = stringResource(id = R.string.open_battery_settings),
+                    onClick = { openBatterySettings(context) }
+                )
                 Spacer(modifier = Modifier.height(24.dp))
             }
-        }
 
-        Column(
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .padding(bottom = 96.dp)
-                .padding(start = 16.dp, end = 16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            if (canToggle) {
-                val statusTextColor = Color.White
-                Text(
-                    text = if (isOn) "Включено" else "Выключено",
-                    fontSize = 26.sp,
-                    color = statusTextColor,
-                    fontWeight = FontWeight.SemiBold
-                )
+            Spacer(modifier = Modifier.weight(1f))
 
-                Spacer(modifier = Modifier.height(6.dp))
+            ToggleSection(
+                state = state,
+                onToggle = { coordinator.toggleBlocker() }
+            )
 
-                val toggleLabel = if (isOn) "Нажмите, чтобы выключить" else "Нажмите, чтобы включить"
-                Text(
-                    text = toggleLabel,
-                    fontSize = 16.sp,
-                    color = Color.White
+            state.errorMessage?.let { error ->
+                Spacer(modifier = Modifier.height(12.dp))
+                ErrorCard(
+                    message = error,
+                    onDismiss = { coordinator.clearError() }
                 )
             }
 
             Spacer(modifier = Modifier.height(24.dp))
+
             Text(
                 text = "Как скрыть приложение?",
                 fontSize = 12.sp,
@@ -338,65 +186,189 @@ fun MainScreen(context: Context) {
     }
 }
 
-fun checkAccessibilityPermission(context: Context): Boolean {
-    val resolver = context.contentResolver
-    val enabledServices = Settings.Secure.getString(
-        resolver,
-        Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES
-    ) ?: ""
-
-    val component = ComponentName(context, AppMonitorService::class.java)
-    val fullId = component.flattenToString() // ru.scaik.scammaxdisabler/ru.scaik.scammaxdisabler.AppMonitorService
-    val shortId = "${context.packageName}/.AppMonitorService" // ru.scaik.scammaxdisabler/.AppMonitorService (на некоторых прошивках)
-
-    return enabledServices.split(':').any { it == fullId || it == shortId }
+@Composable
+private fun PermissionCard(
+    title: String,
+    text: String,
+    buttonText: String,
+    onClick: () -> Unit
+) {
+    Card(
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = title,
+                color = Color(0xFF1A1A1A),
+                fontWeight = FontWeight.Bold,
+                fontSize = 16.sp
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = text,
+                color = Color.Black,
+                fontSize = 14.sp
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            TextButton(
+                onClick = onClick,
+                shape = RoundedCornerShape(8.dp)
+            ) {
+                Text(text = buttonText)
+            }
+        }
+    }
 }
 
-fun checkOverlayPermission(context: Context): Boolean {
-    return Settings.canDrawOverlays(context)
+@Composable
+private fun ToggleSection(
+    state: AppState,
+    onToggle: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        if (state.canToggle) {
+            Text(
+                text = if (state.blockerEnabled) "Включено" else "Выключено",
+                fontSize = 26.sp,
+                color = Color.White,
+                fontWeight = FontWeight.SemiBold
+            )
+
+            Spacer(modifier = Modifier.height(6.dp))
+
+            val toggleLabel = if (state.blockerEnabled) "Нажмите, чтобы выключить" else "Нажмите, чтобы включить"
+            Text(
+                text = toggleLabel,
+                fontSize = 16.sp,
+                color = Color.White
+            )
+        }
+    }
+
+    Spacer(modifier = Modifier.height(32.dp))
+
+    Box(
+        modifier = Modifier
+            .size(200.dp)
+            .background(
+                color = Color.White.copy(alpha = 0.3f),
+                shape = RoundedCornerShape(100.dp)
+            )
+            .border(
+                width = 4.dp,
+                color = Color.White,
+                shape = RoundedCornerShape(100.dp)
+            )
+            .clickable(enabled = state.canToggle) { onToggle() },
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = if (state.canToggle) {
+                if (state.blockerEnabled) "ВЫКЛ" else "ВКЛ"
+            } else {
+                "—"
+            },
+            fontSize = 32.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color.White
+        )
+    }
 }
 
-fun isBatteryOptimizationIgnored(context: Context): Boolean {
-    val pm = context.getSystemService(Context.POWER_SERVICE) as PowerManager
-    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-        pm.isIgnoringBatteryOptimizations(context.packageName)
-    } else true
+@Composable
+private fun ErrorCard(
+    message: String,
+    onDismiss: () -> Unit
+) {
+    Card(
+        shape = RoundedCornerShape(8.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.Red.copy(alpha = 0.1f))
+    ) {
+        Text(
+            text = message,
+            fontSize = 14.sp,
+            color = Color.Red,
+            modifier = Modifier
+                .padding(12.dp)
+                .clickable { onDismiss() }
+        )
+    }
 }
 
-private fun startWarmUpService(context: Context) {
+private fun openAccessibilitySettings(context: Context) {
     try {
-        val intent = Intent(context, WarmUpService::class.java)
-        ContextCompat.startForegroundService(context, intent)
-    } catch (_: Exception) { }
+        val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS).apply {
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        }
+        context.startActivity(intent)
+    } catch (_: Exception) {
+        openSettings(context)
+    }
+}
+
+private fun openOverlaySettings(context: Context) {
+    try {
+        val intent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:${context.packageName}"))
+        } else {
+            Intent(Settings.ACTION_SETTINGS)
+        }.apply {
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        }
+        context.startActivity(intent)
+    } catch (_: Exception) {
+        openSettings(context)
+    }
+}
+
+private fun openBatterySettings(context: Context) {
+    try {
+        val intent = Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS).apply {
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        }
+        context.startActivity(intent)
+    } catch (_: Exception) {
+        openSettings(context)
+    }
+}
+
+private fun openSettings(context: Context) {
+    try {
+        val intent = Intent(Settings.ACTION_SETTINGS).apply {
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        }
+        context.startActivity(intent)
+    } catch (_: Exception) {}
 }
 
 private fun openAutoStartSettings(context: Context) {
     val intents = listOf(
-        // MIUI
         Intent().setClassName("com.miui.securitycenter", "com.miui.permcenter.autostart.AutoStartManagementActivity"),
-        // EMUI
+        Intent().setClassName("com.letv.android.letvsafe", "com.letv.android.letvsafe.AutobootManageActivity"),
         Intent().setClassName("com.huawei.systemmanager", "com.huawei.systemmanager.startupmgr.ui.StartupNormalAppListActivity"),
-        // ColorOS (Oppo)
-        Intent().setClassName("com.coloros.safecenter", "com.coloros.safecenter.startupapp.StartupAppListActivity"),
-        Intent().setClassName("com.oppo.safe", "com.oppo.safe.permission.startup.StartupAppListActivity"),
-        // Vivo
-        Intent().setClassName("com.iqoo.secure", "com.iqoo.secure.ui.phoneoptimize.AddWhiteListActivity"),
-        Intent().setClassName("com.vivo.permissionmanager", "com.vivo.permissionmanager.activity.BgStartUpManagerActivity"),
-        // OnePlus
-        Intent().setClassName("com.oneplus.security", "com.oneplus.security.chainlaunch.view.ChainLaunchAppListActivity"),
-        // Fallback to app details
-        Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply { data = ("package:" + context.packageName).toUri() },
-        // Final fallback: settings
-        Intent(Settings.ACTION_SETTINGS)
+        Intent().setClassName("com.huawei.systemmanager", "com.huawei.systemmanager.optimize.process.ProtectActivity"),
+        Intent().setClassName("com.android.settings", "com.android.settings.Settings\$AdvancedAppSettingsActivity")
     )
 
-    for (i in intents) {
+    for (intent in intents) {
         try {
-            i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            if (i.resolveActivity(context.packageManager) != null) {
-                context.startActivity(i)
-                return
-            }
-        } catch (_: Exception) { }
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            context.startActivity(intent)
+            return
+        } catch (_: Exception) {
+            continue
+        }
     }
+    openSettings(context)
 }
