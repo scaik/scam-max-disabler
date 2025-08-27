@@ -1,0 +1,7 @@
+<resources>
+    <string
+        name="crash_dialog_title"
+    >В приложении "MAX" снова произошел сбой</string>
+    <string name="crash_dialog_close">Закрыть приложение</string>
+    <string name="crash_dialog_info">Сведения о приложении</string>
+</resources>
