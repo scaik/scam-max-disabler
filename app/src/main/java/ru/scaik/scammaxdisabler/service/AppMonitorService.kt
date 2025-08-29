@@ -7,20 +7,22 @@ import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
-import android.util.Log
 import android.view.WindowManager
 import android.view.accessibility.AccessibilityEvent
 import androidx.core.net.toUri
 import ru.scaik.scammaxdisabler.ScamMaxDisablerApplication
 import ru.scaik.scammaxdisabler.state.BlockerStateManager
 import ru.scaik.scammaxdisabler.state.ServiceStateManager
-import java.util.logging.Logger
+import ru.scaik.scammaxdisabler.R
 
 class AppMonitorService : AccessibilityService() {
 
     private lateinit var blockerStateManager: BlockerStateManager
     private lateinit var serviceStateManager: ServiceStateManager
     private val mainHandler = Handler(Looper.getMainLooper())
+
+    private var lastBlockedTimestamp = 0L
+    private var lastHandledPackage: String? = null
 
     override fun onCreate() {
         super.onCreate()
@@ -49,7 +51,9 @@ class AppMonitorService : AccessibilityService() {
         val packageName = event?.packageName?.toString() ?: return
         if (!isTargetApplication(packageName)) return
 
-        blockTargetApplication()
+        if (isTargetAppBecomingActive(event, packageName)) {
+            blockTargetApplication()
+        }
     }
 
     private fun shouldProcessEvent(event: AccessibilityEvent?): Boolean {
@@ -59,6 +63,25 @@ class AppMonitorService : AccessibilityService() {
 
     private fun isTargetApplication(packageName: String): Boolean {
         return packageName == TARGET_PACKAGE_NAME
+    }
+
+    private fun isTargetAppBecomingActive(event: AccessibilityEvent, packageName: String): Boolean {
+        val currentTime = System.currentTimeMillis()
+        val isDuplicateEvent = (currentTime - lastBlockedTimestamp) < DUPLICATE_EVENT_THRESHOLD_MS
+
+        if (isDuplicateEvent && lastHandledPackage == packageName) {
+            return false
+        }
+
+        val isOpeningEvent = event.className != null
+
+        if (isOpeningEvent) {
+            lastBlockedTimestamp = currentTime
+            lastHandledPackage = packageName
+            return true
+        }
+
+        return false
     }
 
     private fun blockTargetApplication() {
@@ -85,11 +108,11 @@ class AppMonitorService : AccessibilityService() {
 
     private fun createBlockingDialog(): AlertDialog {
         return AlertDialog.Builder(this, android.R.style.Theme_DeviceDefault_Dialog_Alert)
-            .setTitle(BLOCKING_DIALOG_TITLE)
-            .setPositiveButton(BLOCKING_DIALOG_CLOSE_BUTTON) { _, _ ->
+            .setTitle(getString(R.string.blocking_dialog_error_message, TARGET_APP_DISPLAY_NAME))
+            .setPositiveButton(getString(R.string.blocking_dialog_close_button)) { _, _ ->
                 navigateToHomeScreen()
             }
-            .setNegativeButton(BLOCKING_DIALOG_INFO_BUTTON) { _, _ ->
+            .setNegativeButton(getString(R.string.blocking_dialog_info_button)) { _, _ ->
                 openApplicationSettings()
             }
             .create()
@@ -131,9 +154,8 @@ class AppMonitorService : AccessibilityService() {
 
     companion object {
         private const val TARGET_PACKAGE_NAME = "ru.oneme.app"
+        private const val TARGET_APP_DISPLAY_NAME = "MAX"
         private const val DIALOG_DISPLAY_DELAY_MS = 250L
-        private const val BLOCKING_DIALOG_TITLE = "В приложении \"MAX\" произошла ошибка"
-        private const val BLOCKING_DIALOG_CLOSE_BUTTON = "Закрыть приложение"
-        private const val BLOCKING_DIALOG_INFO_BUTTON = "Сведения о приложении"
+        private const val DUPLICATE_EVENT_THRESHOLD_MS = 1000L
     }
 }
