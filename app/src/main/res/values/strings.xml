@@ -1,16 +1,7 @@
 <resources>
     <string name="app_name">скаМ</string>
-    <string
-        name="instr_title_reliability"
-    >Рекомендации для стабильной работы</string>
-    <string
-        name="instr_text_reliability"
-    >Чтобы служба работала после перезагрузки:\n\n• Отключите оптимизацию батареи для приложения\n• Разрешите автозапуск/фон. работу (если есть в прошивке)\n\nГде искать: Настройки → Батарея → Оптимизация батареи → Все приложения → скаМ → Не оптимизировать. На MIUI/EMUI/ColorOS/Vivo — включите «Автозапуск» для приложения.</string>
+    <string name="instr_title_reliability">Рекомендации для стабильной работы</string>
+    <string name="instr_text_reliability">Чтобы служба работала после перезагрузки:\n\n• Отключите оптимизацию батареи для приложения\n• Разрешите автозапуск/фон. работу (если есть в прошивке)\n\nГде искать: Настройки → Батарея → Оптимизация батареи → Все приложения → скаМ → Не оптимизировать. На MIUI/EMUI/ColorOS/Vivo — включите «Автозапуск» для приложения.</string>
     <string name="open_battery_settings">Открыть настройки батареи</string>
-    <string
-        name="open_autostart_settings"
-    >Открыть настройки автозапуска</string>
-    <string name="crash_dialog_title">MAX keeps stopping</string>
-    <string name="crash_dialog_close">Close app</string>
-    <string name="crash_dialog_info">App info</string>
+    <string name="open_autostart_settings">Открыть настройки автозапуска</string>
 </resources>

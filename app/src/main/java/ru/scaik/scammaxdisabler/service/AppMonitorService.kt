@@ -11,12 +11,10 @@ import android.view.WindowManager
 import android.view.accessibility.AccessibilityEvent
 import androidx.core.net.toUri
 import ru.scaik.scammaxdisabler.data.Prefs
-import ru.scaik.scammaxdisabler.domain.CrashMessageProvider
 
 class AppMonitorService : AccessibilityService() {
 
     private val handler = Handler(Looper.getMainLooper())
-    private val crashMessageProvider by lazy { CrashMessageProvider(this) }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
         if (!shouldBlock(event)) return
@@ -41,11 +39,11 @@ class AppMonitorService : AccessibilityService() {
 
     private fun showCrashDialog() {
         val dialog = AlertDialog.Builder(this, android.R.style.Theme_DeviceDefault_Dialog_Alert)
-            .setTitle(crashMessageProvider.getCrashDialogTitle())
-            .setPositiveButton(crashMessageProvider.getCloseButtonText()) { _, _ ->
+            .setTitle("В приложении \"MAX\" произошла ошибка")
+            .setPositiveButton("Закрыть приложение") { _, _ ->
                 performGlobalAction(GLOBAL_ACTION_HOME)
             }
-            .setNegativeButton(crashMessageProvider.getInfoButtonText()) { _, _ ->
+            .setNegativeButton("Сведения о приложении") { _, _ ->
                 openAppSettings()
             }
             .create()
