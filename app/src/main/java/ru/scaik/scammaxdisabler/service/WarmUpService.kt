@@ -61,7 +61,12 @@ class WarmUpService : Service() {
     private fun stopSelfGracefully() {
         serviceScope.launch {
             delay(GRACEFUL_STOP_DELAY_MS)
-            stopForeground(STOP_FOREGROUND_REMOVE)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                stopForeground(Service.STOP_FOREGROUND_REMOVE)
+            } else {
+                @Suppress("DEPRECATION")
+                stopForeground(true)
+            }
             stopSelf()
         }
     }
