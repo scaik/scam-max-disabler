@@ -1,50 +1,79 @@
 package ru.scaik.scammaxdisabler
 
-import android.content.Context
-import android.os.Bundle
-import android.content.Intent
 import android.content.ComponentName
-import android.net.Uri
+import android.content.Context
+import android.content.Intent
 import android.os.Build
+import android.os.Bundle
 import android.os.PowerManager
 import android.provider.Settings
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import ru.scaik.scammaxdisabler.ui.theme.ScamMaxDisablerTheme
+import androidx.core.content.ContextCompat
+import androidx.core.net.toUri
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
-import androidx.compose.ui.platform.LocalUriHandler
-import androidx.core.net.toUri
-import androidx.core.content.ContextCompat
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
+import ru.scaik.scammaxdisabler.service.ServiceRestartHelper
+import ru.scaik.scammaxdisabler.service.WarmUpService
+import ru.scaik.scammaxdisabler.state.BlockerStateManager
+import ru.scaik.scammaxdisabler.state.PermissionStateManager
+import ru.scaik.scammaxdisabler.state.ServiceStateManager
+import ru.scaik.scammaxdisabler.ui.theme.ScamMaxDisablerTheme
 
 class MainActivity : ComponentActivity() {
+
+    internal lateinit var serviceStateManager: ServiceStateManager
+    internal lateinit var blockerStateManager: BlockerStateManager
+    internal lateinit var permissionStateManager: PermissionStateManager
+    private lateinit var serviceRestartHelper: ServiceRestartHelper
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        initializeManagers()
+        ensureServiceRunning()
+        scheduleServiceChecks()
         enableEdgeToEdge()
         setContent {
             ScamMaxDisablerTheme {
@@ -52,14 +81,61 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+
+    override fun onStart() {
+        super.onStart()
+        refreshAllStates()
+        serviceStateManager.startMonitoring()
+        permissionStateManager.startMonitoring()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        serviceStateManager.stopMonitoring()
+        permissionStateManager.stopMonitoring()
+    }
+
+    private fun initializeManagers() {
+        val application = ScamMaxDisablerApplication.getInstance(this)
+        if (application != null) {
+            serviceStateManager = application.serviceStateManager
+            blockerStateManager = application.blockerStateManager
+            permissionStateManager = application.permissionStateManager
+        } else {
+            serviceStateManager = ServiceStateManager.getInstance(this)
+            blockerStateManager = BlockerStateManager.getInstance(this)
+            permissionStateManager = PermissionStateManager.getInstance(this)
+        }
+        serviceRestartHelper = ServiceRestartHelper(this)
+    }
+
+    private fun ensureServiceRunning() {
+        lifecycleScope.launch {
+            serviceStateManager.ensureServiceRunning()
+        }
+    }
+
+    private fun scheduleServiceChecks() {
+        serviceRestartHelper.schedulePeriodicServiceCheck()
+    }
+
+    private fun refreshAllStates() {
+        permissionStateManager.refreshPermissionStates()
+        blockerStateManager.refreshStateFromStorage()
+    }
 }
 
 @Composable
 fun MainScreen(context: Context) {
-    var isOn by remember { mutableStateOf(Prefs.isBlockerEnabled(context)) }
+    val activity = context as MainActivity
+    val blockerStateManager = activity.blockerStateManager
+    val permissionStateManager = activity.permissionStateManager
+
+    var isOn by remember { mutableStateOf(blockerStateManager.isBlockerEnabled()) }
     var hasAccessibility by remember { mutableStateOf(checkAccessibilityPermission(context)) }
     var hasOverlay by remember { mutableStateOf(checkOverlayPermission(context)) }
     var batteryUnrestricted by remember { mutableStateOf(isBatteryOptimizationIgnored(context)) }
+
     val gradientColors = if (isOn) {
         listOf(Color(0xFF000000), Color(0xFFF60000))
     } else {
@@ -70,7 +146,7 @@ fun MainScreen(context: Context) {
     val toggleIfAllowed: () -> Unit = {
         if (canToggle) {
             isOn = !isOn
-            Prefs.setBlockerEnabled(context, isOn)
+            blockerStateManager.setBlockerEnabled(isOn)
             if (isOn && hasAccessibility) {
                 startWarmUpService(context)
             }
@@ -88,9 +164,9 @@ fun MainScreen(context: Context) {
                 batteryUnrestricted = isBatteryOptimizationIgnored(context)
                 if (!hasAccessibility) {
                     isOn = false
-                    Prefs.setBlockerEnabled(context, false)
+                    blockerStateManager.setBlockerEnabled(false)
                 }
-                if (hasAccessibility && Prefs.isBlockerEnabled(context)) {
+                if (hasAccessibility && blockerStateManager.isBlockerEnabled()) {
                     startWarmUpService(context)
                 }
             }
@@ -104,7 +180,7 @@ fun MainScreen(context: Context) {
     LaunchedEffect(hasAccessibility) {
         if (!hasAccessibility && isOn) {
             isOn = false
-            Prefs.setBlockerEnabled(context, false)
+            blockerStateManager.setBlockerEnabled(false)
         }
     }
 
@@ -166,7 +242,7 @@ fun MainScreen(context: Context) {
                         )
                         Spacer(modifier = Modifier.height(6.dp))
                         Text(
-                            text = "Если переключатель недоступен (Android 13+):\n1) Откройте настройки приложения\n2) Включите ‘Разрешить ограниченные настройки’\n3) Вернитесь и включите службу в ‘Спец. возможности’.",
+                            text = "Если переключатель недоступен (Android 13+):\n1) Откройте настройки приложения\n2) Включите 'Разрешить ограниченные настройки'\n3) Вернитесь и включите службу в 'Спец. возможности'.",
                             color = Color.Black,
                             fontSize = 13.sp
                         )
@@ -185,10 +261,11 @@ fun MainScreen(context: Context) {
                         Spacer(modifier = Modifier.height(4.dp))
                         TextButton(
                             onClick = {
-                                val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-                                    data = ("package:" + context.packageName).toUri()
-                                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                                }
+                                val intent =
+                                    Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                                        data = ("package:" + context.packageName).toUri()
+                                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                    }
                                 context.startActivity(intent)
                             },
                             shape = RoundedCornerShape(8.dp)
@@ -266,9 +343,10 @@ fun MainScreen(context: Context) {
                         TextButton(
                             onClick = {
                                 try {
-                                    val intent = Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS).apply {
-                                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                                    }
+                                    val intent =
+                                        Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS).apply {
+                                            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                        }
                                     context.startActivity(intent)
                                 } catch (_: Exception) {
                                     try {
@@ -276,7 +354,8 @@ fun MainScreen(context: Context) {
                                             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                                         }
                                         context.startActivity(fallback)
-                                    } catch (_: Exception) { }
+                                    } catch (_: Exception) {
+                                    }
                                 }
                             },
                             shape = RoundedCornerShape(8.dp)
@@ -316,7 +395,8 @@ fun MainScreen(context: Context) {
 
                 Spacer(modifier = Modifier.height(6.dp))
 
-                val toggleLabel = if (isOn) "Нажмите, чтобы выключить" else "Нажмите, чтобы включить"
+                val toggleLabel =
+                    if (isOn) "Нажмите, чтобы выключить" else "Нажмите, чтобы включить"
                 Text(
                     text = toggleLabel,
                     fontSize = 16.sp,
@@ -345,9 +425,10 @@ fun checkAccessibilityPermission(context: Context): Boolean {
         Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES
     ) ?: ""
 
-    val component = ComponentName(context, AppMonitorService::class.java)
-    val fullId = component.flattenToString() // ru.scaik.scammaxdisabler/ru.scaik.scammaxdisabler.AppMonitorService
-    val shortId = "${context.packageName}/.AppMonitorService" // ru.scaik.scammaxdisabler/.AppMonitorService (на некоторых прошивках)
+    val component =
+        ComponentName(context, ru.scaik.scammaxdisabler.service.AppMonitorService::class.java)
+    val fullId = component.flattenToString()
+    val shortId = "${context.packageName}/.AppMonitorService"
 
     return enabledServices.split(':').any { it == fullId || it == shortId }
 }
@@ -367,25 +448,49 @@ private fun startWarmUpService(context: Context) {
     try {
         val intent = Intent(context, WarmUpService::class.java)
         ContextCompat.startForegroundService(context, intent)
-    } catch (_: Exception) { }
+    } catch (_: Exception) {
+    }
 }
 
 private fun openAutoStartSettings(context: Context) {
     val intents = listOf(
         // MIUI
-        Intent().setClassName("com.miui.securitycenter", "com.miui.permcenter.autostart.AutoStartManagementActivity"),
+        Intent().setClassName(
+            "com.miui.securitycenter",
+            "com.miui.permcenter.autostart.AutoStartManagementActivity"
+        ),
         // EMUI
-        Intent().setClassName("com.huawei.systemmanager", "com.huawei.systemmanager.startupmgr.ui.StartupNormalAppListActivity"),
+        Intent().setClassName(
+            "com.huawei.systemmanager",
+            "com.huawei.systemmanager.startupmgr.ui.StartupNormalAppListActivity"
+        ),
         // ColorOS (Oppo)
-        Intent().setClassName("com.coloros.safecenter", "com.coloros.safecenter.startupapp.StartupAppListActivity"),
-        Intent().setClassName("com.oppo.safe", "com.oppo.safe.permission.startup.StartupAppListActivity"),
+        Intent().setClassName(
+            "com.coloros.safecenter",
+            "com.coloros.safecenter.startupapp.StartupAppListActivity"
+        ),
+        Intent().setClassName(
+            "com.oppo.safe",
+            "com.oppo.safe.permission.startup.StartupAppListActivity"
+        ),
         // Vivo
-        Intent().setClassName("com.iqoo.secure", "com.iqoo.secure.ui.phoneoptimize.AddWhiteListActivity"),
-        Intent().setClassName("com.vivo.permissionmanager", "com.vivo.permissionmanager.activity.BgStartUpManagerActivity"),
+        Intent().setClassName(
+            "com.iqoo.secure",
+            "com.iqoo.secure.ui.phoneoptimize.AddWhiteListActivity"
+        ),
+        Intent().setClassName(
+            "com.vivo.permissionmanager",
+            "com.vivo.permissionmanager.activity.BgStartUpManagerActivity"
+        ),
         // OnePlus
-        Intent().setClassName("com.oneplus.security", "com.oneplus.security.chainlaunch.view.ChainLaunchAppListActivity"),
+        Intent().setClassName(
+            "com.oneplus.security",
+            "com.oneplus.security.chainlaunch.view.ChainLaunchAppListActivity"
+        ),
         // Fallback to app details
-        Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply { data = ("package:" + context.packageName).toUri() },
+        Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+            data = ("package:" + context.packageName).toUri()
+        },
         // Final fallback: settings
         Intent(Settings.ACTION_SETTINGS)
     )
@@ -397,6 +502,7 @@ private fun openAutoStartSettings(context: Context) {
                 context.startActivity(i)
                 return
             }
-        } catch (_: Exception) { }
+        } catch (_: Exception) {
+        }
     }
 }
