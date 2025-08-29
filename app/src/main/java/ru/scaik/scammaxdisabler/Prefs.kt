@@ -1,4 +1,4 @@
-package ru.scaik.scammaxdisabler.data
+package ru.scaik.scammaxdisabler
 
 import android.content.Context
 import androidx.core.content.edit
