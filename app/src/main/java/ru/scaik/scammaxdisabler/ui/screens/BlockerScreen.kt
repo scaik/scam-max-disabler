@@ -8,6 +8,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Accessibility
 import androidx.compose.material.icons.filled.BatteryChargingFull
 import androidx.compose.material.icons.filled.Block
+import androidx.compose.material.icons.filled.FileDownloadOff
 import androidx.compose.material.icons.filled.Layers
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -283,7 +284,7 @@ fun BlockerScreen(context: Context, modifier: Modifier = Modifier) {
                             )
                         }
                     },
-                    powerButtonIcon = Icons.Filled.Block,
+                    powerButtonIcon = Icons.Filled.FileDownloadOff,
                     isOperationInProgress = isInstallationOperationInProgress
             )
 

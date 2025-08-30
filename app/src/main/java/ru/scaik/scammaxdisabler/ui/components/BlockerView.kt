@@ -55,23 +55,23 @@ import ru.scaik.scammaxdisabler.ui.theme.TextSecondaryDark
 import ru.scaik.scammaxdisabler.ui.theme.TextSecondaryLight
 
 data class Permission(
-    val title: String,
-    val description: String,
-    val icon: androidx.compose.ui.graphics.vector.ImageVector,
-    val isGranted: Boolean,
-    val instructions: String,
-    val actions: List<Pair<String, () -> Unit>>
+        val title: String,
+        val description: String,
+        val icon: androidx.compose.ui.graphics.vector.ImageVector,
+        val isGranted: Boolean,
+        val instructions: String,
+        val actions: List<Pair<String, () -> Unit>>
 )
 
 data class BlockerViewState(
-    val isBlockerEnabled: Boolean,
-    val permissions: List<Permission>,
-    val canToggleBlocker: Boolean,
-    val onToggleBlocker: () -> Unit,
-    val isInstallationBlocking: Boolean = false,
-    val onSwitchView: () -> Unit = {},
-    val powerButtonIcon: androidx.compose.ui.graphics.vector.ImageVector? = null,
-    val isOperationInProgress: Boolean = false
+        val isBlockerEnabled: Boolean,
+        val permissions: List<Permission>,
+        val canToggleBlocker: Boolean,
+        val onToggleBlocker: () -> Unit,
+        val isInstallationBlocking: Boolean = false,
+        val onSwitchView: () -> Unit = {},
+        val powerButtonIcon: androidx.compose.ui.graphics.vector.ImageVector? = null,
+        val isOperationInProgress: Boolean = false
 )
 
 @Composable
@@ -79,111 +79,111 @@ fun BlockerView(state: BlockerViewState, modifier: Modifier = Modifier) {
     Box(modifier = modifier.fillMaxSize()) {
         Box(modifier = modifier.fillMaxSize()) {
             val gradientColors =
-                if (state.isBlockerEnabled) {
-                    // Both modes use same active colors (red)
-                    listOf(
-                        Color(0xFF2A1A1A), // Dark reddish charcoal
-                        Color(0xFF3D2222), // Medium reddish charcoal
-                        Color(0xFF660000) // Darker red
-                    )
-                } else {
-                    if (state.isInstallationBlocking) {
+                    if (state.isBlockerEnabled) {
+                        // Both modes use same active colors (red)
                         listOf(
-                            Color(0xFFB8F5E0), // Lighter mint green
-                            Color(0xFF87EBCE), // Light mint green
-                            Color(0xFFB8DCDC) // Lighter teal
+                                Color(0xFF2A1A1A), // Dark reddish charcoal
+                                Color(0xFF3D2222), // Medium reddish charcoal
+                                Color(0xFF660000) // Darker red
                         )
                     } else {
-                        listOf(
-                            Color(0xFFB8E0F5), // Lighter sky blue
-                            Color(0xFF87CEEB), // Light sky blue
-                            Color(0xFFB8A9DC) // Lighter slate blue
-                        )
+                        if (state.isInstallationBlocking) {
+                            listOf(
+                                    Color(0xFFB8F5E0), // Lighter mint green
+                                    Color(0xFF87EBCE), // Light mint green
+                                    Color(0xFFB8DCDC) // Lighter teal
+                            )
+                        } else {
+                            listOf(
+                                    Color(0xFFB8E0F5), // Lighter sky blue
+                                    Color(0xFF87CEEB), // Light sky blue
+                                    Color(0xFFB8A9DC) // Lighter slate blue
+                            )
+                        }
                     }
-                }
 
             // Gradient background fills entire screen including safe zones
             Box(
-                modifier =
-                    Modifier
-                        .fillMaxSize()
-                        .gradientBackground(colors = gradientColors, angle = 135f)
-                        .clickable(
-                            enabled = state.canToggleBlocker,
-                            interactionSource =
-                                remember { MutableInteractionSource() },
-                            indication = null
-                        ) { state.onToggleBlocker() }
+                    modifier =
+                            Modifier.fillMaxSize()
+                                    .gradientBackground(colors = gradientColors, angle = 135f)
+                                    .clickable(
+                                            enabled = state.canToggleBlocker,
+                                            interactionSource =
+                                                    remember { MutableInteractionSource() },
+                                            indication = null
+                                    ) { state.onToggleBlocker() }
             )
 
             Column(
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .align(Alignment.TopCenter)
-                        .systemBarsPadding()
-                        .padding(top = 16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+                    modifier =
+                            Modifier.fillMaxWidth()
+                                    .align(Alignment.TopCenter)
+                                    .systemBarsPadding()
+                                    .padding(top = 16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Row(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
                 ) {
                     // App icon settings button
                     Box(
-                        modifier = Modifier
-                            .padding(horizontal = 16.dp),
-                        contentAlignment = Alignment.TopStart
+                            modifier = Modifier.padding(horizontal = 16.dp),
+                            contentAlignment = Alignment.TopStart
                     ) {
                         Box(
-                            modifier =
-                                Modifier
-                                    .size(48.dp)
-                                    .background(
-                                        color = Color.White.copy(alpha = 0.15f),
-                                        shape = CircleShape
-                                    )
-                                    .border(
-                                        width = 1.dp,
-                                        color = Color.White.copy(alpha = 0.2f),
-                                        shape = CircleShape
-                                    )
-                                    .clickable(
-                                        onClick = state.onSwitchView,
-                                        enabled = !state.isBlockerEnabled,
-                                        interactionSource =
-                                            remember { MutableInteractionSource() },
-                                        indication = null
-                                    ),
-                            contentAlignment = Alignment.Center
+                                modifier =
+                                        Modifier.size(48.dp)
+                                                .background(
+                                                        color = Color.White.copy(alpha = 0.15f),
+                                                        shape = CircleShape
+                                                )
+                                                .border(
+                                                        width = 1.dp,
+                                                        color = Color.White.copy(alpha = 0.2f),
+                                                        shape = CircleShape
+                                                )
+                                                .clickable(
+                                                        onClick = state.onSwitchView,
+                                                        enabled = !state.isBlockerEnabled,
+                                                        interactionSource =
+                                                                remember {
+                                                                    MutableInteractionSource()
+                                                                },
+                                                        indication = null
+                                                ),
+                                contentAlignment = Alignment.Center
                         ) {
                             Box(contentAlignment = Alignment.Center) {
                                 androidx.compose.material3.Icon(
-                                    imageVector =
-                                        androidx.compose.material.icons.Icons.Filled.FlipToBack,
-                                    contentDescription = null,
-                                    modifier = Modifier
-                                        .size(32.dp)
-                                        .blur(4.dp),
-                                    tint = if (state.isBlockerEnabled) {
-                                        CrimsonAccent
-                                    } else {
-                                        SkyBlueMedium
-                                    }.copy(alpha = 0.6f)
+                                        imageVector =
+                                                androidx.compose.material.icons.Icons.Filled
+                                                        .FlipToBack,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(32.dp).blur(4.dp),
+                                        tint =
+                                                if (state.isBlockerEnabled) {
+                                                            CrimsonAccent
+                                                        } else {
+                                                            SkyBlueMedium
+                                                        }
+                                                        .copy(alpha = 0.6f)
                                 )
 
                                 androidx.compose.material3.Icon(
-                                    imageVector =
-                                        androidx.compose.material.icons.Icons.Filled.FlipToBack,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(28.dp),
-                                    tint = if (state.isBlockerEnabled) {
-                                        CrimsonAccent
-                                    } else {
-                                        SkyBlueMedium
-                                    }
+                                        imageVector =
+                                                androidx.compose.material.icons.Icons.Filled
+                                                        .FlipToBack,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(28.dp),
+                                        tint =
+                                                if (state.isBlockerEnabled) {
+                                                    CrimsonAccent
+                                                } else {
+                                                    SkyBlueMedium
+                                                }
                                 )
                             }
                         }
@@ -191,54 +191,56 @@ fun BlockerView(state: BlockerViewState, modifier: Modifier = Modifier) {
 
                     // Mode switch button (Active ↔ Installation Blocking)
                     Box(
-                        modifier = Modifier
-                            .padding(horizontal = 16.dp),
-                        contentAlignment = Alignment.TopEnd
+                            modifier = Modifier.padding(horizontal = 16.dp),
+                            contentAlignment = Alignment.TopEnd
                     ) {
                         Box(
-                            modifier =
-                                Modifier
-                                    .size(48.dp)
-                                    .background(
-                                        color = Color.White.copy(alpha = 0.15f),
-                                        shape = CircleShape
-                                    )
-                                    .border(
-                                        width = 1.dp,
-                                        color = Color.White.copy(alpha = 0.2f),
-                                        shape = CircleShape
-                                    )
-                                    .clickable(
-                                        onClick = state.onSwitchView,
-                                        enabled = !state.isBlockerEnabled,
-                                        interactionSource =
-                                            remember { MutableInteractionSource() },
-                                        indication = null
-                                    ),
-                            contentAlignment = Alignment.Center
+                                modifier =
+                                        Modifier.size(48.dp)
+                                                .background(
+                                                        color = Color.White.copy(alpha = 0.15f),
+                                                        shape = CircleShape
+                                                )
+                                                .border(
+                                                        width = 1.dp,
+                                                        color = Color.White.copy(alpha = 0.2f),
+                                                        shape = CircleShape
+                                                )
+                                                .clickable(
+                                                        onClick = state.onSwitchView,
+                                                        enabled = !state.isBlockerEnabled,
+                                                        interactionSource =
+                                                                remember {
+                                                                    MutableInteractionSource()
+                                                                },
+                                                        indication = null
+                                                ),
+                                contentAlignment = Alignment.Center
                         ) {
                             Box {
                                 if (!state.isBlockerEnabled) {
                                     androidx.compose.material3.Icon(
-                                        imageVector =
-                                            androidx.compose.material.icons.Icons.Filled.SwapHoriz,
-                                        contentDescription = null,
-                                        modifier = Modifier.size(32.dp).blur(4.dp),
-                                        tint = SkyBlueAccent.copy(alpha = 0.6f)
+                                            imageVector =
+                                                    androidx.compose.material.icons.Icons.Filled
+                                                            .SwapHoriz,
+                                            contentDescription = null,
+                                            modifier = Modifier.size(32.dp).blur(4.dp),
+                                            tint = SkyBlueAccent.copy(alpha = 0.6f)
                                     )
                                 }
 
                                 androidx.compose.material3.Icon(
-                                    imageVector =
-                                        androidx.compose.material.icons.Icons.Filled.SwapHoriz,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(32.dp),
-                                    tint =
-                                        if (state.isBlockerEnabled) {
-                                            Color.Gray.copy(alpha = 0.4f)
-                                        } else {
-                                            SkyBlueAccent
-                                        }
+                                        imageVector =
+                                                androidx.compose.material.icons.Icons.Filled
+                                                        .SwapHoriz,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(32.dp),
+                                        tint =
+                                                if (state.isBlockerEnabled) {
+                                                    Color.Gray.copy(alpha = 0.4f)
+                                                } else {
+                                                    SkyBlueAccent
+                                                }
                                 )
                             }
                         }
@@ -246,23 +248,21 @@ fun BlockerView(state: BlockerViewState, modifier: Modifier = Modifier) {
                 }
 
                 AnimatedAppLogo(
-                    isActive = state.isBlockerEnabled,
-                    modifier = Modifier.heightIn(max = 300.dp)
+                        isActive = state.isBlockerEnabled,
+                        modifier = Modifier.heightIn(max = 300.dp)
                 )
             }
 
             Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .align(Alignment.Center),
-                contentAlignment = Alignment.Center
+                    modifier = Modifier.fillMaxWidth().align(Alignment.Center),
+                    contentAlignment = Alignment.Center
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     CircularPowerIndicator(
-                        isActive = state.isBlockerEnabled,
-                        enabled = state.canToggleBlocker,
-                        size = 140.dp,
-                        customIcon = state.powerButtonIcon
+                            isActive = state.isBlockerEnabled,
+                            enabled = state.canToggleBlocker,
+                            size = 140.dp,
+                            customIcon = state.powerButtonIcon
                     )
                 }
             }
@@ -271,45 +271,43 @@ fun BlockerView(state: BlockerViewState, modifier: Modifier = Modifier) {
             val showPermissions = state.permissions.isNotEmpty() && !state.isInstallationBlocking
 
             Box(
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .align(Alignment.BottomCenter)
-                        .systemBarsPadding()
-                        .padding(bottom = 60.dp)
+                    modifier =
+                            Modifier.fillMaxWidth()
+                                    .align(Alignment.BottomCenter)
+                                    .systemBarsPadding()
+                                    .padding(bottom = 60.dp)
             ) {
                 if (allPermissionsGranted || state.isInstallationBlocking) {
                     GlassmorphicStatusCard(
-                        isActive = state.isBlockerEnabled,
-                        statusText =
-                            if (state.isOperationInProgress && state.isInstallationBlocking
-                            ) {
-                                if (state.isBlockerEnabled) "Удаление блокировщика..."
-                                else "Установка блокировщика..."
-                            } else if (state.isBlockerEnabled) {
-                                if (state.isInstallationBlocking) "Блокировщик установлен"
-                                else "Активная блокировка включена"
-                            } else {
-                                if (state.isInstallationBlocking)
-                                    "Блокировщик не установлен"
-                                else "Активная блокировка отключена"
-                            },
-                        subtitle =
-                            if (state.isOperationInProgress && state.isInstallationBlocking
-                            ) {
-                                "Пожалуйста, подождите..."
-                            } else if (state.isBlockerEnabled) {
-                                if (state.isInstallationBlocking) "Нажмите для удаления"
-                                else "MAX заблокирован"
-                            } else {
-                                if (state.isInstallationBlocking) "Нажмите для установки"
-                                else "Нажмите для активации блокировки"
-                            },
-                        modifier =
-                            Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 24.dp)
-                                .height(100.dp)
+                            isActive = state.isBlockerEnabled,
+                            statusText =
+                                    if (state.isOperationInProgress && state.isInstallationBlocking
+                                    ) {
+                                        if (state.isBlockerEnabled) "Удаление блокировщика..."
+                                        else "Установка блокировщика..."
+                                    } else if (state.isBlockerEnabled) {
+                                        if (state.isInstallationBlocking) "Установлен"
+                                        else "Активная блокировка"
+                                    } else {
+                                        if (state.isInstallationBlocking)
+                                                "Не установлен"
+                                        else "Не заблокировано"
+                                    },
+                            subtitle =
+                                    if (state.isOperationInProgress && state.isInstallationBlocking
+                                    ) {
+                                        "Пожалуйста, подождите..."
+                                    } else if (state.isBlockerEnabled) {
+                                        if (state.isInstallationBlocking) "Удалить блокировщик"
+                                        else "MAX заблокирован"
+                                    } else {
+                                        if (state.isInstallationBlocking) "Установить блокировщик"
+                                        else "Нажмите для активации"
+                                    },
+                            modifier =
+                                    Modifier.fillMaxWidth()
+                                            .padding(horizontal = 24.dp)
+                                            .height(100.dp)
                     )
                 } else if (showPermissions) {
                     PermissionCards(state = state, modifier = Modifier.padding(horizontal = 16.dp))
@@ -318,44 +316,38 @@ fun BlockerView(state: BlockerViewState, modifier: Modifier = Modifier) {
 
             // Bottom hint text
             Text(
-                text =
-                    when {
-                        state.isOperationInProgress && state.isInstallationBlocking -> {
-                            "Выполняется операция с пакетом..."
-                        }
-
-                        state.isBlockerEnabled -> {
-                            if (state.isInstallationBlocking) {
-                                "Блокировщик установлен • Переключение режимов недоступно"
+                    text =
+                            when {
+                                state.isOperationInProgress && state.isInstallationBlocking -> {
+                                    "Выполняется операция с пакетом..."
+                                }
+                                state.isBlockerEnabled -> {
+                                    if (state.isInstallationBlocking) {
+                                        "Блокировщик установлен • Переключение режимов недоступно"
+                                    } else {
+                                        "Активная блокировка включена • Переключение режимов недоступно"
+                                    }
+                                }
+                                !state.canToggleBlocker && !state.isInstallationBlocking -> {
+                                    "Предоставьте необходимые разрешения"
+                                }
+                                state.isInstallationBlocking -> {
+                                    "Нажмите кнопку ↔ для переключения в режим активной блокировки"
+                                }
+                                else -> {
+                                    "Нажмите кнопку ↔ для переключения в режим блокировки установки"
+                                }
+                            },
+                    fontSize = 12.sp,
+                    color =
+                            if (state.isBlockerEnabled) {
+                                TextSecondaryDark.copy(alpha = 0.6f)
                             } else {
-                                "Активная блокировка включена • Переключение режимов недоступно"
-                            }
-                        }
-
-                        !state.canToggleBlocker && !state.isInstallationBlocking -> {
-                            "Предоставьте необходимые разрешения"
-                        }
-
-                        state.isInstallationBlocking -> {
-                            "Нажмите кнопку ↔ для переключения в режим активной блокировки"
-                        }
-
-                        else -> {
-                            "Нажмите кнопку ↔ для переключения в режим блокировки установки"
-                        }
-                    },
-                fontSize = 12.sp,
-                color =
-                    if (state.isBlockerEnabled) {
-                        TextSecondaryDark.copy(alpha = 0.6f)
-                    } else {
-                        TextSecondaryLight.copy(alpha = 0.6f)
-                    },
-                fontWeight = FontWeight.Normal,
-                textAlign = TextAlign.Center,
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .systemBarsPadding()
+                                TextSecondaryLight.copy(alpha = 0.6f)
+                            },
+                    fontWeight = FontWeight.Normal,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.align(Alignment.BottomCenter).systemBarsPadding()
             )
         }
     }
@@ -364,104 +356,98 @@ fun BlockerView(state: BlockerViewState, modifier: Modifier = Modifier) {
 @Composable
 private fun AnimatedAppLogo(isActive: Boolean, modifier: Modifier = Modifier) {
     val alpha by
-    animateFloatAsState(
-        targetValue = if (isActive) 1f else 0.9f,
-        animationSpec = tween(600),
-        label = "logoAlpha"
-    )
+            animateFloatAsState(
+                    targetValue = if (isActive) 1f else 0.9f,
+                    animationSpec = tween(600),
+                    label = "logoAlpha"
+            )
 
     val glowAlpha by
-    animateFloatAsState(
-        targetValue = if (isActive) 1f else 0f,
-        animationSpec = tween(800),
-        label = "glowAlpha"
-    )
+            animateFloatAsState(
+                    targetValue = if (isActive) 1f else 0f,
+                    animationSpec = tween(800),
+                    label = "glowAlpha"
+            )
 
     val shadowAlpha by
-    animateFloatAsState(
-        targetValue = if (!isActive) 1f else 0f,
-        animationSpec = tween(600),
-        label = "shadowAlpha"
-    )
+            animateFloatAsState(
+                    targetValue = if (!isActive) 1f else 0f,
+                    animationSpec = tween(600),
+                    label = "shadowAlpha"
+            )
 
     val gradientAlpha by
-    animateFloatAsState(
-        targetValue = if (!isActive) 1f else 0f,
-        animationSpec = tween(600),
-        label = "gradientAlpha"
-    )
+            animateFloatAsState(
+                    targetValue = if (!isActive) 1f else 0f,
+                    animationSpec = tween(600),
+                    label = "gradientAlpha"
+            )
 
     Box(modifier = modifier.alpha(alpha), contentAlignment = Alignment.Center) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Image(
-                painter = painterResource(id = R.drawable.logo),
-                contentDescription = null,
-                contentScale = ContentScale.Fit,
-                alignment = Alignment.Center,
-                colorFilter = ColorFilter.tint(CrimsonBright),
-                modifier = Modifier
-                    .blur(64.dp)
-                    .alpha(glowAlpha)
+                    painter = painterResource(id = R.drawable.logo),
+                    contentDescription = null,
+                    contentScale = ContentScale.Fit,
+                    alignment = Alignment.Center,
+                    colorFilter = ColorFilter.tint(CrimsonBright),
+                    modifier = Modifier.blur(64.dp).alpha(glowAlpha)
             )
 
             Image(
-                painter = painterResource(id = R.drawable.logo),
-                contentDescription = null,
-                contentScale = ContentScale.Fit,
-                alignment = Alignment.Center,
-                colorFilter = ColorFilter.tint(Color(0xFF999999)),
-                modifier = Modifier
-                    .blur(20.dp)
-                    .alpha(shadowAlpha * 0.3f)
+                    painter = painterResource(id = R.drawable.logo),
+                    contentDescription = null,
+                    contentScale = ContentScale.Fit,
+                    alignment = Alignment.Center,
+                    colorFilter = ColorFilter.tint(Color(0xFF999999)),
+                    modifier = Modifier.blur(20.dp).alpha(shadowAlpha * 0.3f)
             )
 
             Image(
-                painter = painterResource(id = R.drawable.logo),
-                contentDescription = null,
-                modifier =
-                    Modifier
-                        .fillMaxSize()
-                        .drawWithContent {
-                            drawContent()
-                            if (gradientAlpha > 0f) {
-                                drawRect(
-                                    brush =
-                                        Brush.linearGradient(
-                                            0.0f to
-                                                    Color(0xFF6B00CC)
-                                                        .copy(
-                                                            alpha =
-                                                                gradientAlpha
-                                                        ), // Brighter Violet
-                                            0.4f to
-                                                    Color(0xFF6B00CC)
-                                                        .copy(
-                                                            alpha =
-                                                                gradientAlpha
-                                                        ), // Brighter Violet
-                                            // extended
-                                            0.6f to
-                                                    Color(0xFF00BBFF)
-                                                        .copy(
-                                                            alpha =
-                                                                gradientAlpha
-                                                        ), // Brighter Blue
-                                            1.0f to
-                                                    Color(0xFF00BBFF)
-                                                        .copy(
-                                                            alpha =
-                                                                gradientAlpha
-                                                        ), // Brighter Blue
-                                            // extended
-                                            start = Offset(size.width, 0f),
-                                            end = Offset(0f, size.height)
-                                        ),
-                                    blendMode = BlendMode.SrcAtop
-                                )
-                            }
-                        },
-                contentScale = ContentScale.Fit,
-                alignment = Alignment.Center
+                    painter = painterResource(id = R.drawable.logo),
+                    contentDescription = null,
+                    modifier =
+                            Modifier.fillMaxSize().drawWithContent {
+                                drawContent()
+                                if (gradientAlpha > 0f) {
+                                    drawRect(
+                                            brush =
+                                                    Brush.linearGradient(
+                                                            0.0f to
+                                                                    Color(0xFF6B00CC)
+                                                                            .copy(
+                                                                                    alpha =
+                                                                                            gradientAlpha
+                                                                            ), // Brighter Violet
+                                                            0.4f to
+                                                                    Color(0xFF6B00CC)
+                                                                            .copy(
+                                                                                    alpha =
+                                                                                            gradientAlpha
+                                                                            ), // Brighter Violet
+                                                            // extended
+                                                            0.6f to
+                                                                    Color(0xFF00BBFF)
+                                                                            .copy(
+                                                                                    alpha =
+                                                                                            gradientAlpha
+                                                                            ), // Brighter Blue
+                                                            1.0f to
+                                                                    Color(0xFF00BBFF)
+                                                                            .copy(
+                                                                                    alpha =
+                                                                                            gradientAlpha
+                                                                            ), // Brighter Blue
+                                                            // extended
+                                                            start = Offset(size.width, 0f),
+                                                            end = Offset(0f, size.height)
+                                                    ),
+                                            blendMode = BlendMode.SrcAtop
+                                    )
+                                }
+                            },
+                    contentScale = ContentScale.Fit,
+                    alignment = Alignment.Center
             )
         }
     }
@@ -472,17 +458,17 @@ private fun PermissionCards(state: BlockerViewState, modifier: Modifier = Modifi
     Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         state.permissions.forEach { permission ->
             AnimatedVisibility(
-                visible = !permission.isGranted,
-                enter = slideInVertically { it } + fadeIn(),
-                exit = slideOutVertically { it } + fadeOut()
+                    visible = !permission.isGranted,
+                    enter = slideInVertically { it } + fadeIn(),
+                    exit = slideOutVertically { it } + fadeOut()
             ) {
                 CompactPermissionCard(
-                    title = permission.title,
-                    description = permission.description,
-                    icon = permission.icon,
-                    isGranted = permission.isGranted,
-                    instructions = permission.instructions,
-                    actions = permission.actions
+                        title = permission.title,
+                        description = permission.description,
+                        icon = permission.icon,
+                        isGranted = permission.isGranted,
+                        instructions = permission.instructions,
+                        actions = permission.actions
                 )
             }
         }
