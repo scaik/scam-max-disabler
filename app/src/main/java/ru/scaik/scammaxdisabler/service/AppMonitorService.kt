@@ -10,10 +10,10 @@ import android.provider.Settings
 import android.view.WindowManager
 import android.view.accessibility.AccessibilityEvent
 import androidx.core.net.toUri
+import ru.scaik.scammaxdisabler.R
 import ru.scaik.scammaxdisabler.ScamMaxDisablerApplication
 import ru.scaik.scammaxdisabler.state.BlockerStateManager
 import ru.scaik.scammaxdisabler.state.ServiceStateManager
-import ru.scaik.scammaxdisabler.R
 
 class AppMonitorService : AccessibilityService() {
 
@@ -58,7 +58,7 @@ class AppMonitorService : AccessibilityService() {
 
     private fun shouldProcessEvent(event: AccessibilityEvent?): Boolean {
         return blockerStateManager.isBlockerEnabled() &&
-               event?.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED
+            event?.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED
     }
 
     private fun isTargetApplication(packageName: String): Boolean {

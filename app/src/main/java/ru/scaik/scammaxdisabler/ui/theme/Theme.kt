@@ -12,81 +12,81 @@ import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
 private val NeomorphicDarkColorScheme =
-        darkColorScheme(
-                primary = CrimsonMedium,
-                onPrimary = TextPrimaryDark,
-                primaryContainer = CrimsonDark,
-                onPrimaryContainer = TextPrimaryDark,
-                secondary = SkyBlueMedium,
-                onSecondary = TextPrimaryDark,
-                secondaryContainer = SkyBlueDark,
-                onSecondaryContainer = TextPrimaryDark,
-                tertiary = SkyBlueAccent,
-                onTertiary = TextPrimaryDark,
-                tertiaryContainer = SkyBlueDark,
-                onTertiaryContainer = TextPrimaryDark,
-                error = ErrorRed,
-                errorContainer = ErrorRed.copy(alpha = 0.2f),
-                onError = TextPrimaryDark,
-                onErrorContainer = TextPrimaryDark,
-                background = CharcoalMedium,
-                onBackground = TextPrimaryDark,
-                surface = CharcoalLight,
-                onSurface = TextPrimaryDark,
-                surfaceVariant = CharcoalSoft,
-                onSurfaceVariant = TextSecondaryDark,
-                outline = DividerDark,
-                outlineVariant = DividerDark.copy(alpha = 0.5f),
-                inverseSurface = NeumorphicLightSurface,
-                inverseOnSurface = TextPrimaryLight,
-                inversePrimary = SkyBlueMedium,
-                surfaceTint = CrimsonAccent
-        )
+    darkColorScheme(
+        primary = CrimsonMedium,
+        onPrimary = TextPrimaryDark,
+        primaryContainer = CrimsonDark,
+        onPrimaryContainer = TextPrimaryDark,
+        secondary = SkyBlueMedium,
+        onSecondary = TextPrimaryDark,
+        secondaryContainer = SkyBlueDark,
+        onSecondaryContainer = TextPrimaryDark,
+        tertiary = SkyBlueAccent,
+        onTertiary = TextPrimaryDark,
+        tertiaryContainer = SkyBlueDark,
+        onTertiaryContainer = TextPrimaryDark,
+        error = ErrorRed,
+        errorContainer = ErrorRed.copy(alpha = 0.2f),
+        onError = TextPrimaryDark,
+        onErrorContainer = TextPrimaryDark,
+        background = CharcoalMedium,
+        onBackground = TextPrimaryDark,
+        surface = CharcoalLight,
+        onSurface = TextPrimaryDark,
+        surfaceVariant = CharcoalSoft,
+        onSurfaceVariant = TextSecondaryDark,
+        outline = DividerDark,
+        outlineVariant = DividerDark.copy(alpha = 0.5f),
+        inverseSurface = NeumorphicLightSurface,
+        inverseOnSurface = TextPrimaryLight,
+        inversePrimary = SkyBlueMedium,
+        surfaceTint = CrimsonAccent
+    )
 
 private val NeomorphicLightColorScheme =
-        lightColorScheme(
-                primary = SkyBlueMedium,
-                onPrimary = Color.White,
-                primaryContainer = SkyBlueLight.copy(alpha = 0.3f),
-                onPrimaryContainer = TextPrimaryLight,
-                secondary = CrimsonMedium,
-                onSecondary = Color.White,
-                secondaryContainer = CrimsonBright.copy(alpha = 0.2f),
-                onSecondaryContainer = TextPrimaryLight,
-                tertiary = SkyBlueAccent,
-                onTertiary = Color.White,
-                tertiaryContainer = SkyBlueAccent.copy(alpha = 0.2f),
-                onTertiaryContainer = TextPrimaryLight,
-                error = ErrorRed,
-                errorContainer = ErrorRed.copy(alpha = 0.1f),
-                onError = Color.White,
-                onErrorContainer = ErrorRed,
-                background = NeumorphicLightBackground,
-                onBackground = TextPrimaryLight,
-                surface = NeumorphicLightSurface,
-                onSurface = TextPrimaryLight,
-                surfaceVariant = NeumorphicLightSurface.copy(alpha = 0.8f),
-                onSurfaceVariant = TextSecondaryLight,
-                outline = DividerLight,
-                outlineVariant = DividerLight.copy(alpha = 0.5f),
-                inverseSurface = CharcoalMedium,
-                inverseOnSurface = TextPrimaryDark,
-                inversePrimary = CrimsonMedium,
-                surfaceTint = SkyBlueAccent
-        )
+    lightColorScheme(
+        primary = SkyBlueMedium,
+        onPrimary = Color.White,
+        primaryContainer = SkyBlueLight.copy(alpha = 0.3f),
+        onPrimaryContainer = TextPrimaryLight,
+        secondary = CrimsonMedium,
+        onSecondary = Color.White,
+        secondaryContainer = CrimsonBright.copy(alpha = 0.2f),
+        onSecondaryContainer = TextPrimaryLight,
+        tertiary = SkyBlueAccent,
+        onTertiary = Color.White,
+        tertiaryContainer = SkyBlueAccent.copy(alpha = 0.2f),
+        onTertiaryContainer = TextPrimaryLight,
+        error = ErrorRed,
+        errorContainer = ErrorRed.copy(alpha = 0.1f),
+        onError = Color.White,
+        onErrorContainer = ErrorRed,
+        background = NeumorphicLightBackground,
+        onBackground = TextPrimaryLight,
+        surface = NeumorphicLightSurface,
+        onSurface = TextPrimaryLight,
+        surfaceVariant = NeumorphicLightSurface.copy(alpha = 0.8f),
+        onSurfaceVariant = TextSecondaryLight,
+        outline = DividerLight,
+        outlineVariant = DividerLight.copy(alpha = 0.5f),
+        inverseSurface = CharcoalMedium,
+        inverseOnSurface = TextPrimaryDark,
+        inversePrimary = CrimsonMedium,
+        surfaceTint = SkyBlueAccent
+    )
 
 @Composable
 fun ScamMaxDisablerTheme(
-        darkTheme: Boolean = isSystemInDarkTheme(),
-        dynamicColor: Boolean = false,
-        isBlockerActive: Boolean = false,
-        content: @Composable () -> Unit
+    darkTheme: Boolean = isSystemInDarkTheme(),
+    dynamicColor: Boolean = false,
+    isBlockerActive: Boolean = false,
+    content: @Composable () -> Unit
 ) {
     val colorScheme =
-            when {
-                darkTheme -> NeomorphicDarkColorScheme
-                else -> NeomorphicLightColorScheme
-            }
+        when {
+            darkTheme -> NeomorphicDarkColorScheme
+            else -> NeomorphicLightColorScheme
+        }
 
     val view = LocalView.current
     if (!view.isInEditMode) {

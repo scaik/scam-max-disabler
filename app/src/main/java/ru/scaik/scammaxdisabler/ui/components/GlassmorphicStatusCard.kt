@@ -37,7 +37,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import ru.scaik.scammaxdisabler.ui.theme.*
+import ru.scaik.scammaxdisabler.ui.theme.CrimsonAccent
+import ru.scaik.scammaxdisabler.ui.theme.SkyBlueAccent
+import ru.scaik.scammaxdisabler.ui.theme.TextPrimaryDark
+import ru.scaik.scammaxdisabler.ui.theme.TextPrimaryLight
 
 @Composable
 fun GlassmorphicStatusCard(
@@ -82,7 +85,8 @@ fun GlassmorphicStatusCard(
         label = "textColor"
     )
 
-    val surfaceColor = if (isActive) Color.Black.copy(alpha = 0.15f) else Color.White.copy(alpha = 0.25f)
+    val surfaceColor =
+        if (isActive) Color.Black.copy(alpha = 0.15f) else Color.White.copy(alpha = 0.25f)
 
     val glassConfig = GlassmorphicConfig(
         blurRadius = 30.dp,

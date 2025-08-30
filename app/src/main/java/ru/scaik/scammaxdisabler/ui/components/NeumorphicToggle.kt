@@ -30,7 +30,18 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import ru.scaik.scammaxdisabler.ui.theme.*
+import ru.scaik.scammaxdisabler.ui.theme.CrimsonAccent
+import ru.scaik.scammaxdisabler.ui.theme.CrimsonBright
+import ru.scaik.scammaxdisabler.ui.theme.CrimsonDark
+import ru.scaik.scammaxdisabler.ui.theme.NeumorphicDarkGlow
+import ru.scaik.scammaxdisabler.ui.theme.NeumorphicDarkShadow
+import ru.scaik.scammaxdisabler.ui.theme.NeumorphicLightGlow
+import ru.scaik.scammaxdisabler.ui.theme.NeumorphicLightShadow
+import ru.scaik.scammaxdisabler.ui.theme.RippleDark
+import ru.scaik.scammaxdisabler.ui.theme.RippleLight
+import ru.scaik.scammaxdisabler.ui.theme.SkyBlueAccent
+import ru.scaik.scammaxdisabler.ui.theme.SkyBlueLight
+import ru.scaik.scammaxdisabler.ui.theme.SkyBlueMedium
 
 @Composable
 fun NeumorphicToggle(

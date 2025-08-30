@@ -42,120 +42,126 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import ru.scaik.scammaxdisabler.ui.theme.*
+import ru.scaik.scammaxdisabler.ui.theme.ErrorRed
+import ru.scaik.scammaxdisabler.ui.theme.SuccessGreen
+import ru.scaik.scammaxdisabler.ui.theme.TextPrimaryLight
+import ru.scaik.scammaxdisabler.ui.theme.TextSecondaryLight
 
 @Composable
 fun CompactPermissionCard(
-        title: String,
-        description: String,
-        icon: ImageVector,
-        isGranted: Boolean,
-        modifier: Modifier = Modifier,
-        instructions: String? = null,
-        actions: List<Pair<String, () -> Unit>> = emptyList()
+    title: String,
+    description: String,
+    icon: ImageVector,
+    isGranted: Boolean,
+    modifier: Modifier = Modifier,
+    instructions: String? = null,
+    actions: List<Pair<String, () -> Unit>> = emptyList()
 ) {
     val haptics = LocalHapticFeedback.current
     val interactionSource = remember { MutableInteractionSource() }
     var isExpanded by remember { mutableStateOf(false) }
 
     val statusColor by
-            animateColorAsState(
-                    targetValue = if (isGranted) SuccessGreen else ErrorRed,
-                    animationSpec = tween(400),
-                    label = "statusColor"
-            )
+    animateColorAsState(
+        targetValue = if (isGranted) SuccessGreen else ErrorRed,
+        animationSpec = tween(400),
+        label = "statusColor"
+    )
 
     val surfaceColor =
-            if (isGranted) {
-                Color.White.copy(alpha = 0.4f)
-            } else {
-                Color.White.copy(alpha = 0.45f)
-            }
+        if (isGranted) {
+            Color.White.copy(alpha = 0.4f)
+        } else {
+            Color.White.copy(alpha = 0.45f)
+        }
 
     val glassConfig =
-            GlassmorphicConfig(
-                    blurRadius = 20.dp,
-                    surfaceColor = surfaceColor,
-                    borderColor = Color.Transparent,
-                    borderWidth = 0.dp
-            )
+        GlassmorphicConfig(
+            blurRadius = 20.dp,
+            surfaceColor = surfaceColor,
+            borderColor = Color.Transparent,
+            borderWidth = 0.dp
+        )
 
     androidx.compose.foundation.layout.Column(modifier = modifier.fillMaxWidth()) {
         Box(
-                modifier =
-                        Modifier.fillMaxWidth()
-                                .height(72.dp)
-                                .shadow(
-                                        elevation = 6.dp,
-                                        shape =
-                                                if (isExpanded && instructions != null && !isGranted
-                                                ) {
-                                                    RoundedCornerShape(
-                                                            topStart = 12.dp,
-                                                            topEnd = 12.dp,
-                                                            bottomStart = 0.dp,
-                                                            bottomEnd = 0.dp
-                                                    )
-                                                } else {
-                                                    RoundedCornerShape(12.dp)
-                                                },
-                                        ambientColor = statusColor.copy(alpha = 0.1f),
-                                        spotColor = statusColor.copy(alpha = 0.1f)
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .height(72.dp)
+                    .shadow(
+                        elevation = 6.dp,
+                        shape =
+                            if (isExpanded && instructions != null && !isGranted
+                            ) {
+                                RoundedCornerShape(
+                                    topStart = 12.dp,
+                                    topEnd = 12.dp,
+                                    bottomStart = 0.dp,
+                                    bottomEnd = 0.dp
                                 )
-                                .clip(
-                                        if (isExpanded && instructions != null && !isGranted) {
-                                            RoundedCornerShape(
-                                                    topStart = 12.dp,
-                                                    topEnd = 12.dp,
-                                                    bottomStart = 0.dp,
-                                                    bottomEnd = 0.dp
-                                            )
-                                        } else {
-                                            RoundedCornerShape(12.dp)
-                                        }
+                            } else {
+                                RoundedCornerShape(12.dp)
+                            },
+                        ambientColor = statusColor.copy(alpha = 0.1f),
+                        spotColor = statusColor.copy(alpha = 0.1f)
+                    )
+                    .clip(
+                        if (isExpanded && instructions != null && !isGranted) {
+                            RoundedCornerShape(
+                                topStart = 12.dp,
+                                topEnd = 12.dp,
+                                bottomStart = 0.dp,
+                                bottomEnd = 0.dp
+                            )
+                        } else {
+                            RoundedCornerShape(12.dp)
+                        }
+                    )
+                    .glassmorphicSurface(glassConfig)
+                    .background(
+                        brush =
+                            Brush.verticalGradient(
+                                colors =
+                                    listOf(
+                                        surfaceColor,
+                                        surfaceColor.copy(
+                                            alpha =
+                                                surfaceColor
+                                                    .alpha *
+                                                        0.9f
+                                        )
+                                    )
+                            )
+                    )
+                    .clickable(
+                        interactionSource = interactionSource,
+                        indication = null,
+                        onClick = {
+                            if (!isGranted &&
+                                (instructions != null ||
+                                        actions.isNotEmpty())
+                            ) {
+                                haptics.performHapticFeedback(
+                                    HapticFeedbackType.LongPress
                                 )
-                                .glassmorphicSurface(glassConfig)
-                                .background(
-                                        brush =
-                                                Brush.verticalGradient(
-                                                        colors =
-                                                                listOf(
-                                                                        surfaceColor,
-                                                                        surfaceColor.copy(
-                                                                                alpha =
-                                                                                        surfaceColor
-                                                                                                .alpha *
-                                                                                                0.9f
-                                                                        )
-                                                                )
-                                                )
+                                isExpanded = !isExpanded
+                            } else if (!isGranted && actions.isNotEmpty()) {
+                                haptics.performHapticFeedback(
+                                    HapticFeedbackType.LongPress
                                 )
-                                .clickable(
-                                        interactionSource = interactionSource,
-                                        indication = null,
-                                        onClick = {
-                                            if (!isGranted &&
-                                                            (instructions != null ||
-                                                                    actions.isNotEmpty())
-                                            ) {
-                                                haptics.performHapticFeedback(
-                                                        HapticFeedbackType.LongPress
-                                                )
-                                                isExpanded = !isExpanded
-                                            } else if (!isGranted && actions.isNotEmpty()) {
-                                                haptics.performHapticFeedback(
-                                                        HapticFeedbackType.LongPress
-                                                )
-                                                actions.first().second()
-                                            }
-                                        }
-                                )
+                                actions.first().second()
+                            }
+                        }
+                    )
         ) {
             Row(
-                    modifier =
-                            Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 10.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Start
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 12.dp, vertical = 10.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Start
             ) {
                 CompactIconBox(icon = icon, isGranted = isGranted, statusColor = statusColor)
 
@@ -163,21 +169,21 @@ fun CompactPermissionCard(
 
                 androidx.compose.foundation.layout.Column(modifier = Modifier.weight(1f)) {
                     Text(
-                            text = title,
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.SemiBold,
-                            color = TextPrimaryLight,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
+                        text = title,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = TextPrimaryLight,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
                     Text(
-                            text = description,
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.Normal,
-                            color = TextSecondaryLight.copy(alpha = 0.8f),
-                            maxLines = 2,
-                            overflow = TextOverflow.Ellipsis,
-                            lineHeight = 14.sp
+                        text = description,
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Normal,
+                        color = TextSecondaryLight.copy(alpha = 0.8f),
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
+                        lineHeight = 14.sp
                     )
                 }
 
@@ -185,85 +191,90 @@ fun CompactPermissionCard(
 
                 if (!isGranted && (instructions != null || actions.isNotEmpty())) {
                     Icon(
-                            imageVector =
-                                    if (isExpanded) Icons.Filled.ExpandLess
-                                    else Icons.Filled.ExpandMore,
-                            contentDescription = null,
-                            tint = TextSecondaryLight,
-                            modifier = Modifier.size(20.dp)
+                        imageVector =
+                            if (isExpanded) Icons.Filled.ExpandLess
+                            else Icons.Filled.ExpandMore,
+                        contentDescription = null,
+                        tint = TextSecondaryLight,
+                        modifier = Modifier.size(20.dp)
                     )
                 } else {
                     Icon(
-                            imageVector =
-                                    if (isGranted) Icons.Filled.CheckCircle else Icons.Filled.Error,
-                            contentDescription = null,
-                            tint = statusColor,
-                            modifier = Modifier.size(20.dp).alpha(if (isGranted) 1f else 0.8f)
+                        imageVector =
+                            if (isGranted) Icons.Filled.CheckCircle else Icons.Filled.Error,
+                        contentDescription = null,
+                        tint = statusColor,
+                        modifier = Modifier
+                            .size(20.dp)
+                            .alpha(if (isGranted) 1f else 0.8f)
                     )
                 }
             }
         }
 
         androidx.compose.animation.AnimatedVisibility(
-                visible =
-                        isExpanded && (instructions != null || actions.isNotEmpty()) && !isGranted,
-                enter =
-                        androidx.compose.animation.expandVertically() +
-                                androidx.compose.animation.fadeIn(),
-                exit =
-                        androidx.compose.animation.shrinkVertically() +
-                                androidx.compose.animation.fadeOut()
+            visible =
+                isExpanded && (instructions != null || actions.isNotEmpty()) && !isGranted,
+            enter =
+                androidx.compose.animation.expandVertically() +
+                        androidx.compose.animation.fadeIn(),
+            exit =
+                androidx.compose.animation.shrinkVertically() +
+                        androidx.compose.animation.fadeOut()
         ) {
             instructions?.let {
                 Box(
-                        modifier =
-                                Modifier.fillMaxWidth()
-                                        .clip(
-                                                RoundedCornerShape(
-                                                        topStart = 0.dp,
-                                                        topEnd = 0.dp,
-                                                        bottomStart = 12.dp,
-                                                        bottomEnd = 12.dp
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .clip(
+                                RoundedCornerShape(
+                                    topStart = 0.dp,
+                                    topEnd = 0.dp,
+                                    bottomStart = 12.dp,
+                                    bottomEnd = 12.dp
+                                )
+                            )
+                            .background(
+                                brush =
+                                    Brush.verticalGradient(
+                                        colors =
+                                            listOf(
+                                                surfaceColor,
+                                                surfaceColor.copy(
+                                                    alpha =
+                                                        surfaceColor
+                                                            .alpha *
+                                                                0.7f
                                                 )
-                                        )
-                                        .background(
-                                                brush =
-                                                        Brush.verticalGradient(
-                                                                colors =
-                                                                        listOf(
-                                                                                surfaceColor,
-                                                                                surfaceColor.copy(
-                                                                                        alpha =
-                                                                                                surfaceColor
-                                                                                                        .alpha *
-                                                                                                        0.7f
-                                                                                )
-                                                                        )
-                                                        )
-                                        )
-                                        .padding(12.dp)
+                                            )
+                                    )
+                            )
+                            .padding(12.dp)
                 ) {
                     androidx.compose.foundation.layout.Column {
                         Text(
-                                text = it,
-                                fontSize = 12.sp,
-                                fontWeight = FontWeight.Normal,
-                                color = TextSecondaryLight,
-                                lineHeight = 16.sp
+                            text = it,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Normal,
+                            color = TextSecondaryLight,
+                            lineHeight = 16.sp
                         )
                         androidx.compose.foundation.layout.Spacer(modifier = Modifier.height(8.dp))
 
                         actions.forEach { (text, action) ->
                             androidx.compose.material3.TextButton(
-                                    onClick = {
-                                        haptics.performHapticFeedback(HapticFeedbackType.LongPress)
-                                        action()
-                                    },
-                                    modifier = Modifier.fillMaxWidth().height(40.dp)
+                                onClick = {
+                                    haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                                    action()
+                                },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(40.dp)
                             ) { Text(text = text, fontSize = 13.sp) }
 
                             androidx.compose.foundation.layout.Spacer(
-                                    modifier = Modifier.height(2.dp)
+                                modifier = Modifier.height(2.dp)
                             )
                         }
                     }
@@ -277,36 +288,37 @@ fun CompactPermissionCard(
 private fun CompactIconBox(icon: ImageVector, isGranted: Boolean, statusColor: Color) {
     Box(contentAlignment = Alignment.Center, modifier = Modifier.size(40.dp)) {
         Box(
-                modifier =
-                        Modifier.size(40.dp)
-                                .shadow(
-                                        elevation = 2.dp,
-                                        shape = CircleShape,
-                                        ambientColor = statusColor.copy(alpha = 0.1f),
-                                        spotColor = statusColor.copy(alpha = 0.1f)
-                                )
-                                .clip(CircleShape)
-                                .background(
-                                        brush =
-                                                Brush.radialGradient(
-                                                        colors =
-                                                                listOf(
-                                                                        statusColor.copy(
-                                                                                alpha = 0.08f
-                                                                        ),
-                                                                        statusColor.copy(
-                                                                                alpha = 0.03f
-                                                                        )
-                                                                )
-                                                )
-                                ),
-                contentAlignment = Alignment.Center
+            modifier =
+                Modifier
+                    .size(40.dp)
+                    .shadow(
+                        elevation = 2.dp,
+                        shape = CircleShape,
+                        ambientColor = statusColor.copy(alpha = 0.1f),
+                        spotColor = statusColor.copy(alpha = 0.1f)
+                    )
+                    .clip(CircleShape)
+                    .background(
+                        brush =
+                            Brush.radialGradient(
+                                colors =
+                                    listOf(
+                                        statusColor.copy(
+                                            alpha = 0.08f
+                                        ),
+                                        statusColor.copy(
+                                            alpha = 0.03f
+                                        )
+                                    )
+                            )
+                    ),
+            contentAlignment = Alignment.Center
         ) {
             Icon(
-                    imageVector = icon,
-                    contentDescription = null,
-                    tint = statusColor,
-                    modifier = Modifier.size(22.dp)
+                imageVector = icon,
+                contentDescription = null,
+                tint = statusColor,
+                modifier = Modifier.size(22.dp)
             )
         }
     }

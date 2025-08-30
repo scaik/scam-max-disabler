@@ -26,7 +26,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Accessibility
 import androidx.compose.material.icons.filled.BatteryChargingFull
 import androidx.compose.material.icons.filled.Layers
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -59,7 +58,9 @@ import ru.scaik.scammaxdisabler.ui.components.CircularPowerIndicator
 import ru.scaik.scammaxdisabler.ui.components.CompactPermissionCard
 import ru.scaik.scammaxdisabler.ui.components.GlassmorphicStatusCard
 import ru.scaik.scammaxdisabler.ui.components.gradientBackground
-import ru.scaik.scammaxdisabler.ui.theme.*
+import ru.scaik.scammaxdisabler.ui.theme.CrimsonBright
+import ru.scaik.scammaxdisabler.ui.theme.TextSecondaryDark
+import ru.scaik.scammaxdisabler.ui.theme.TextSecondaryLight
 
 @Composable
 fun BlockerScreen(context: Context, modifier: Modifier = Modifier) {

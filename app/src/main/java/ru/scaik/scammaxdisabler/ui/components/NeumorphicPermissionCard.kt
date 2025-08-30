@@ -27,9 +27,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Error
-import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
-import androidx.compose.material3.ripple
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
@@ -55,7 +53,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import ru.scaik.scammaxdisabler.ui.theme.*
+import ru.scaik.scammaxdisabler.ui.theme.DividerLight
+import ru.scaik.scammaxdisabler.ui.theme.ErrorRed
+import ru.scaik.scammaxdisabler.ui.theme.NeumorphicLightBackground
+import ru.scaik.scammaxdisabler.ui.theme.NeumorphicLightGlow
+import ru.scaik.scammaxdisabler.ui.theme.NeumorphicLightShadow
+import ru.scaik.scammaxdisabler.ui.theme.SkyBlueMedium
+import ru.scaik.scammaxdisabler.ui.theme.SuccessGreen
+import ru.scaik.scammaxdisabler.ui.theme.TextPrimaryLight
+import ru.scaik.scammaxdisabler.ui.theme.TextSecondaryLight
 
 @Composable
 fun NeumorphicPermissionCard(

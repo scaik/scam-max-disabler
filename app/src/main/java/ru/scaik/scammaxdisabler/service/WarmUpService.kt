@@ -8,11 +8,16 @@ import android.content.Intent
 import android.os.Build
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
-import kotlinx.coroutines.*
-import ru.scaik.scammaxdisabler.ScamMaxDisablerApplication
-import ru.scaik.scammaxdisabler.state.ServiceStateManager
-import ru.scaik.scammaxdisabler.state.PermissionStateManager
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import ru.scaik.scammaxdisabler.R
+import ru.scaik.scammaxdisabler.ScamMaxDisablerApplication
+import ru.scaik.scammaxdisabler.state.PermissionStateManager
+import ru.scaik.scammaxdisabler.state.ServiceStateManager
 
 class WarmUpService : Service() {
 
