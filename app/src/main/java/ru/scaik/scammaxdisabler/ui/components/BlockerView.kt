@@ -24,7 +24,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FlipToBack
+import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.SwapHoriz
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -71,7 +73,8 @@ data class BlockerViewState(
         val isInstallationBlocking: Boolean = false,
         val onSwitchView: () -> Unit = {},
         val powerButtonIcon: androidx.compose.ui.graphics.vector.ImageVector? = null,
-        val isOperationInProgress: Boolean = false
+        val isOperationInProgress: Boolean = false,
+        val onOpenIconSelector: () -> Unit = {}
 )
 
 @Composable
@@ -146,8 +149,7 @@ fun BlockerView(state: BlockerViewState, modifier: Modifier = Modifier) {
                                                         shape = CircleShape
                                                 )
                                                 .clickable(
-                                                        onClick = state.onSwitchView,
-                                                        enabled = !state.isBlockerEnabled,
+                                                        onClick = state.onOpenIconSelector,
                                                         interactionSource =
                                                                 remember {
                                                                     MutableInteractionSource()
@@ -158,9 +160,7 @@ fun BlockerView(state: BlockerViewState, modifier: Modifier = Modifier) {
                         ) {
                             Box(contentAlignment = Alignment.Center) {
                                 androidx.compose.material3.Icon(
-                                        imageVector =
-                                                androidx.compose.material.icons.Icons.Filled
-                                                        .FlipToBack,
+                                        imageVector = Icons.Filled.FlipToBack,
                                         contentDescription = null,
                                         modifier = Modifier.size(32.dp).blur(4.dp),
                                         tint =
@@ -173,9 +173,7 @@ fun BlockerView(state: BlockerViewState, modifier: Modifier = Modifier) {
                                 )
 
                                 androidx.compose.material3.Icon(
-                                        imageVector =
-                                                androidx.compose.material.icons.Icons.Filled
-                                                        .FlipToBack,
+                                        imageVector = Icons.Filled.FlipToBack,
                                         contentDescription = null,
                                         modifier = Modifier.size(28.dp),
                                         tint =
@@ -220,9 +218,7 @@ fun BlockerView(state: BlockerViewState, modifier: Modifier = Modifier) {
                             Box {
                                 if (!state.isBlockerEnabled) {
                                     androidx.compose.material3.Icon(
-                                            imageVector =
-                                                    androidx.compose.material.icons.Icons.Filled
-                                                            .SwapHoriz,
+                                            imageVector = Icons.Filled.SwapHoriz,
                                             contentDescription = null,
                                             modifier = Modifier.size(32.dp).blur(4.dp),
                                             tint = SkyBlueAccent.copy(alpha = 0.6f)
@@ -230,9 +226,7 @@ fun BlockerView(state: BlockerViewState, modifier: Modifier = Modifier) {
                                 }
 
                                 androidx.compose.material3.Icon(
-                                        imageVector =
-                                                androidx.compose.material.icons.Icons.Filled
-                                                        .SwapHoriz,
+                                        imageVector = Icons.Filled.SwapHoriz,
                                         contentDescription = null,
                                         modifier = Modifier.size(32.dp),
                                         tint =
@@ -289,8 +283,7 @@ fun BlockerView(state: BlockerViewState, modifier: Modifier = Modifier) {
                                         if (state.isInstallationBlocking) "Установлен"
                                         else "Активная блокировка"
                                     } else {
-                                        if (state.isInstallationBlocking)
-                                                "Не установлен"
+                                        if (state.isInstallationBlocking) "Не установлен"
                                         else "Не заблокировано"
                                     },
                             subtitle =

@@ -8,8 +8,10 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
+import ru.scaik.scammaxdisabler.manager.AppIconManager
 import ru.scaik.scammaxdisabler.service.ServiceRestartHelper
 import ru.scaik.scammaxdisabler.state.BlockerStateManager
+import ru.scaik.scammaxdisabler.state.IconPresetStateManager
 import ru.scaik.scammaxdisabler.state.PermissionStateManager
 import ru.scaik.scammaxdisabler.state.ServiceStateManager
 import ru.scaik.scammaxdisabler.ui.screens.BlockerScreen
@@ -20,6 +22,8 @@ class MainActivity : ComponentActivity() {
     internal lateinit var serviceStateManager: ServiceStateManager
     internal lateinit var blockerStateManager: BlockerStateManager
     internal lateinit var permissionStateManager: PermissionStateManager
+    internal lateinit var iconPresetStateManager: IconPresetStateManager
+    internal lateinit var appIconManager: AppIconManager
     private lateinit var serviceRestartHelper: ServiceRestartHelper
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -57,10 +61,14 @@ class MainActivity : ComponentActivity() {
             serviceStateManager = application.serviceStateManager
             blockerStateManager = application.blockerStateManager
             permissionStateManager = application.permissionStateManager
+            iconPresetStateManager = application.iconPresetStateManager
+            appIconManager = application.appIconManager
         } else {
             serviceStateManager = ServiceStateManager.getInstance(this)
             blockerStateManager = BlockerStateManager.getInstance(this)
             permissionStateManager = PermissionStateManager.getInstance(this)
+            iconPresetStateManager = IconPresetStateManager.getInstance(this)
+            appIconManager = AppIconManager.getInstance(this)
         }
         serviceRestartHelper = ServiceRestartHelper(this)
     }

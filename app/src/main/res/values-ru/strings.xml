@@ -9,4 +9,18 @@
     <string name="blocking_dialog_error_message">В приложении \"%s\" снова произошел сбой</string>
     <string name="blocking_dialog_close_button">Закрыть приложение</string>
     <string name="blocking_dialog_info_button">Сведения о приложении</string>
+
+    <string name="icon_preset_default" translatable="false">скаМ</string>
+    <string name="icon_preset_gallery">Галерея</string>
+    <string name="icon_preset_files">Проводник</string>
+    <string name="icon_preset_settings">Настройки</string>
+    <string name="icon_preset_camera1">Камера</string>
+    <string name="icon_preset_camera2">Камера</string>
+    <string name="icon_preset_yandexmusic">Я.Музыка</string>
+    <string name="icon_preset_music">Музыка</string>
+    <string name="icon_preset_yandexbrowser">Яндекс Браузер</string>
+    <string name="icon_preset_calc1">Калькулятор</string>
+    <string name="icon_preset_calc2">Калькулятор</string>
+    <string name="icon_preset_calc3">Калькулятор</string>
+    <string name="icon_preset_camera3">Камера</string>
 </resources>
