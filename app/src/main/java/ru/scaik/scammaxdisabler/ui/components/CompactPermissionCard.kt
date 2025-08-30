@@ -50,11 +50,9 @@ fun CompactPermissionCard(
         description: String,
         icon: ImageVector,
         isGranted: Boolean,
-        onAction: () -> Unit,
         modifier: Modifier = Modifier,
         instructions: String? = null,
-        extraAction: (() -> Unit)? = null,
-        extraActionText: String? = null
+        actions: List<Pair<String, () -> Unit>> = emptyList()
 ) {
     val haptics = LocalHapticFeedback.current
     val interactionSource = remember { MutableInteractionSource() }
@@ -136,16 +134,19 @@ fun CompactPermissionCard(
                                         interactionSource = interactionSource,
                                         indication = null,
                                         onClick = {
-                                            if (!isGranted && instructions != null) {
+                                            if (!isGranted &&
+                                                            (instructions != null ||
+                                                                    actions.isNotEmpty())
+                                            ) {
                                                 haptics.performHapticFeedback(
                                                         HapticFeedbackType.LongPress
                                                 )
                                                 isExpanded = !isExpanded
-                                            } else if (!isGranted) {
+                                            } else if (!isGranted && actions.isNotEmpty()) {
                                                 haptics.performHapticFeedback(
                                                         HapticFeedbackType.LongPress
                                                 )
-                                                onAction()
+                                                actions.first().second()
                                             }
                                         }
                                 )
@@ -182,7 +183,7 @@ fun CompactPermissionCard(
 
                 Spacer(modifier = Modifier.width(8.dp))
 
-                if (!isGranted && instructions != null) {
+                if (!isGranted && (instructions != null || actions.isNotEmpty())) {
                     Icon(
                             imageVector =
                                     if (isExpanded) Icons.Filled.ExpandLess
@@ -204,7 +205,8 @@ fun CompactPermissionCard(
         }
 
         androidx.compose.animation.AnimatedVisibility(
-                visible = isExpanded && instructions != null && !isGranted,
+                visible =
+                        isExpanded && (instructions != null || actions.isNotEmpty()) && !isGranted,
                 enter =
                         androidx.compose.animation.expandVertically() +
                                 androidx.compose.animation.fadeIn(),
@@ -250,25 +252,19 @@ fun CompactPermissionCard(
                                 lineHeight = 16.sp
                         )
                         androidx.compose.foundation.layout.Spacer(modifier = Modifier.height(8.dp))
-                        androidx.compose.material3.TextButton(
-                                onClick = {
-                                    haptics.performHapticFeedback(HapticFeedbackType.LongPress)
-                                    onAction()
-                                },
-                                modifier = Modifier.fillMaxWidth().height(40.dp)
-                        ) { Text(text = "Открыть настройки", fontSize = 13.sp) }
 
-                        if (extraAction != null && extraActionText != null) {
-                            androidx.compose.foundation.layout.Spacer(
-                                    modifier = Modifier.height(2.dp)
-                            )
+                        actions.forEach { (text, action) ->
                             androidx.compose.material3.TextButton(
                                     onClick = {
                                         haptics.performHapticFeedback(HapticFeedbackType.LongPress)
-                                        extraAction()
+                                        action()
                                     },
                                     modifier = Modifier.fillMaxWidth().height(40.dp)
-                            ) { Text(text = extraActionText, fontSize = 13.sp) }
+                            ) { Text(text = text, fontSize = 13.sp) }
+
+                            androidx.compose.foundation.layout.Spacer(
+                                    modifier = Modifier.height(2.dp)
+                            )
                         }
                     }
                 }
