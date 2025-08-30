@@ -6,8 +6,8 @@
 ![License](https://img.shields.io/github/license/scaik/scam-max-disabler?label=Лицензия)
 
 <p>
-  <a href="https://yoomoney.ru/transfer/quickpay?requestId=353630343938363634315f37306636313738626434356463303164616137613438343737376536643033356530316536656135">
-      <img src="https://i.imgur.com/yUjdV6B.png" width="220" alt="Пожертвовать">
+  <a href="https://pay.cloudtips.ru/p/2c9addac">
+      <img src="docs/images/donate.jpg" width="220" alt="Пожертвовать">
   </a>
 </p>
 
