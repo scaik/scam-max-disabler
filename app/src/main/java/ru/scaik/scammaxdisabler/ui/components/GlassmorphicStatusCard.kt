@@ -134,14 +134,14 @@ fun GlassmorphicStatusCard(
                     pulseAlpha = if (isActive) pulseAlpha else 0.4f
                 )
 
-                Spacer(modifier = Modifier.width(16.dp))
+                Spacer(modifier = Modifier.width(12.dp))
 
                 Column(
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
                 ) {
                     Text(
                         text = statusText,
-                        fontSize = 22.sp,
+                        fontSize = 21.sp,
                         fontWeight = FontWeight.SemiBold,
                         color = textColor
                     )
