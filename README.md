@@ -7,7 +7,7 @@
 
 <p>
   <a href="https://pay.cloudtips.ru/p/2c9addac">
-      <img src="docs/images/donate.png" width="220" alt="Пожертвовать">
+      <img src="docs/images/donate.png" width="150" alt="Пожертвовать">
   </a>
 </p>
 
