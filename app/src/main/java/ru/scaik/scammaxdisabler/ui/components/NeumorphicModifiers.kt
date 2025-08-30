@@ -47,8 +47,6 @@ fun Modifier.glassmorphicSurface(
 ) = this.drawBehind {
     drawGlassmorphicBackground(
         surfaceColor = config.surfaceColor,
-        borderColor = config.borderColor,
-        borderWidth = config.borderWidth.toPx(),
         blurRadius = config.blurRadius.toPx()
     )
 }
@@ -77,23 +75,6 @@ fun Modifier.gradientBackground(
             start = startOffset,
             end = endOffset
         )
-    )
-}
-
-fun Modifier.softPress(
-    isPressed: Boolean,
-    lightShadowColor: Color,
-    darkShadowColor: Color
-) = this.drawBehind {
-    val shadowRadius = if (isPressed) 4.dp.toPx() else 8.dp.toPx()
-    val shadowOffset = if (isPressed) 2.dp.toPx() else 4.dp.toPx()
-
-    drawNeumorphicShadow(
-        lightColor = lightShadowColor,
-        darkColor = darkShadowColor,
-        shadowRadius = shadowRadius,
-        shadowOffset = shadowOffset,
-        cornerRadius = 12.dp.toPx()
     )
 }
 
@@ -153,8 +134,6 @@ private fun DrawScope.drawNeumorphicShadow(
 
 private fun DrawScope.drawGlassmorphicBackground(
     surfaceColor: Color,
-    borderColor: Color,
-    borderWidth: Float,
     blurRadius: Float
 ) {
     drawIntoCanvas { canvas ->

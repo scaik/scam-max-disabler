@@ -31,9 +31,10 @@ class MainActivity : ComponentActivity() {
         setContent {
             val isBlockerEnabled by blockerStateManager.blockerEnabledState.collectAsState()
 
-            ScamMaxDisablerTheme(isBlockerActive = isBlockerEnabled) {
-                BlockerScreen(context = this)
-            }
+            ScamMaxDisablerTheme(
+                    isBlockerActive = isBlockerEnabled,
+                    content = { BlockerScreen(context = this) }
+            )
         }
     }
 

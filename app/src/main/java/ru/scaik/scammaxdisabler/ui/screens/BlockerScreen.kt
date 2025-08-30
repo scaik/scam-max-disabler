@@ -362,8 +362,7 @@ private fun PermissionCards(
                 icon = Icons.Filled.Accessibility,
                 isGranted = hasAccessibilityPermission,
                 instructions =
-                    buildAccessibilityInstructions() +
-                            "\n\nДля пользователей Tecno/Infinix доступен отдельный гид.",
+                    buildAccessibilityInstructions(),
                 actions =
                     listOf(
                         "Открыть «Спец. возможности»" to
@@ -632,6 +631,6 @@ private fun openTecnoInfinixGuide(context: Context) {
 private fun buildBatteryOptimizationInstructions(): String {
     return "Для надежной работы блокировки рекомендуется:\n" +
             "1. Отключить оптимизацию батареи для приложения\n" +
-            "2. Добавить приложение в автозапуск (если доступно)\n" +
+            "2. " + buildAutoloadInstructions() + "\n" +
             "3. Закрепить приложение в памяти"
 }

@@ -2,7 +2,6 @@ package ru.scaik.scammaxdisabler.state
 
 import android.content.ComponentName
 import android.content.Context
-import android.os.Build
 import android.os.PowerManager
 import android.provider.Settings
 import kotlinx.coroutines.CoroutineScope
@@ -123,11 +122,7 @@ class PermissionStateManager private constructor(private val context: Context) {
     }
 
     private fun checkOverlayPermission(): Boolean {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            Settings.canDrawOverlays(applicationContext)
-        } else {
-            true
-        }
+        return Settings.canDrawOverlays(applicationContext)
     }
 
     private fun checkAutoloadPermission(): Boolean {
@@ -154,13 +149,9 @@ class PermissionStateManager private constructor(private val context: Context) {
     }
 
     private fun checkBatteryOptimizationIgnored(): Boolean {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            val powerManager =
-                applicationContext.getSystemService(Context.POWER_SERVICE) as PowerManager
-            powerManager.isIgnoringBatteryOptimizations(applicationContext.packageName)
-        } else {
-            true
-        }
+        val powerManager =
+            applicationContext.getSystemService(Context.POWER_SERVICE) as PowerManager
+        return powerManager.isIgnoringBatteryOptimizations(applicationContext.packageName)
     }
 
     companion object {

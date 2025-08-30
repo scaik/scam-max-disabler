@@ -78,7 +78,6 @@ private val NeomorphicLightColorScheme =
 @Composable
 fun ScamMaxDisablerTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    dynamicColor: Boolean = false,
     isBlockerActive: Boolean = false,
     content: @Composable () -> Unit
 ) {
