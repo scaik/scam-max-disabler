@@ -6,9 +6,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import ru.scaik.scammaxdisabler.state.ServiceStateManager
 import ru.scaik.scammaxdisabler.state.BlockerStateManager
 import ru.scaik.scammaxdisabler.state.PermissionStateManager
+import ru.scaik.scammaxdisabler.state.ServiceStateManager
 
 class ScamMaxDisablerApplication : Application() {
 

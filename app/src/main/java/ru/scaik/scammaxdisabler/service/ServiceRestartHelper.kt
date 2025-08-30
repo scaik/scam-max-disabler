@@ -9,9 +9,15 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.SystemClock
-import androidx.work.*
-import java.util.concurrent.TimeUnit
+import androidx.work.BackoffPolicy
+import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkManager
+import androidx.work.WorkRequest
+import androidx.work.Worker
+import androidx.work.WorkerParameters
 import ru.scaik.scammaxdisabler.receiver.WarmUpReceiver
+import java.util.concurrent.TimeUnit
 
 class ServiceRestartHelper(private val context: Context) {
 
@@ -51,10 +57,14 @@ class ServiceRestartHelper(private val context: Context) {
     private fun scheduleWithJobScheduler() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) return
 
-        val jobScheduler = applicationContext.getSystemService(Context.JOB_SCHEDULER_SERVICE) as? JobScheduler
-            ?: return
+        val jobScheduler =
+            applicationContext.getSystemService(Context.JOB_SCHEDULER_SERVICE) as? JobScheduler
+                ?: return
 
-        val jobInfo = JobInfo.Builder(JOB_ID_SERVICE_CHECK, ComponentName(applicationContext, ServiceCheckJob::class.java))
+        val jobInfo = JobInfo.Builder(
+            JOB_ID_SERVICE_CHECK,
+            ComponentName(applicationContext, ServiceCheckJob::class.java)
+        )
             .setPeriodic(JOB_SCHEDULER_INTERVAL_MILLIS)
             .setPersisted(true)
             .setRequiredNetworkType(JobInfo.NETWORK_TYPE_NONE)
@@ -64,8 +74,9 @@ class ServiceRestartHelper(private val context: Context) {
     }
 
     private fun scheduleWithAlarmManager() {
-        val alarmManager = applicationContext.getSystemService(Context.ALARM_SERVICE) as? AlarmManager
-            ?: return
+        val alarmManager =
+            applicationContext.getSystemService(Context.ALARM_SERVICE) as? AlarmManager
+                ?: return
 
         val intent = Intent(applicationContext, WarmUpReceiver::class.java).apply {
             action = ACTION_SERVICE_CHECK
@@ -83,6 +94,7 @@ class ServiceRestartHelper(private val context: Context) {
                     pendingIntent
                 )
             }
+
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT -> {
                 alarmManager.setExact(
                     AlarmManager.ELAPSED_REALTIME_WAKEUP,
@@ -90,6 +102,7 @@ class ServiceRestartHelper(private val context: Context) {
                     pendingIntent
                 )
             }
+
             else -> {
                 alarmManager.set(
                     AlarmManager.ELAPSED_REALTIME_WAKEUP,
@@ -101,8 +114,9 @@ class ServiceRestartHelper(private val context: Context) {
     }
 
     private fun scheduleDelayedRestartWithAlarmManager() {
-        val alarmManager = applicationContext.getSystemService(Context.ALARM_SERVICE) as? AlarmManager
-            ?: return
+        val alarmManager =
+            applicationContext.getSystemService(Context.ALARM_SERVICE) as? AlarmManager
+                ?: return
 
         val intent = Intent(applicationContext, WarmUpReceiver::class.java).apply {
             action = ACTION_IMMEDIATE_RESTART

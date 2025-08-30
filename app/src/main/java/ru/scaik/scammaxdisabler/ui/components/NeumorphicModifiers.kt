@@ -1,6 +1,5 @@
 package ru.scaik.scammaxdisabler.ui.components
 
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Stable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind

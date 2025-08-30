@@ -29,12 +29,14 @@ class BlockerStateManager private constructor(private val context: Context) {
     }
 
     private fun loadBlockerEnabledState(): Boolean {
-        val preferences = applicationContext.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE)
+        val preferences =
+            applicationContext.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE)
         return preferences.getBoolean(KEY_BLOCKER_ENABLED, DEFAULT_BLOCKER_ENABLED)
     }
 
     private fun persistBlockerEnabledState(enabled: Boolean) {
-        val preferences = applicationContext.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE)
+        val preferences =
+            applicationContext.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE)
         preferences.edit(commit = true) {
             putBoolean(KEY_BLOCKER_ENABLED, enabled)
         }

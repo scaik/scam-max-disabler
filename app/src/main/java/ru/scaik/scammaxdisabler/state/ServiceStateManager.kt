@@ -8,10 +8,17 @@ import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
 import androidx.core.content.ContextCompat
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import ru.scaik.scammaxdisabler.service.AppMonitorService
 import ru.scaik.scammaxdisabler.service.WarmUpService
 
@@ -25,7 +32,8 @@ class ServiceStateManager private constructor(private val context: Context) {
     val serviceRunningState: StateFlow<Boolean> = _serviceRunningState.asStateFlow()
 
     private val _accessibilityPermissionState = MutableStateFlow(false)
-    val accessibilityPermissionState: StateFlow<Boolean> = _accessibilityPermissionState.asStateFlow()
+    val accessibilityPermissionState: StateFlow<Boolean> =
+        _accessibilityPermissionState.asStateFlow()
 
     private var monitoringJob: Job? = null
 
@@ -105,7 +113,8 @@ class ServiceStateManager private constructor(private val context: Context) {
     private fun isServiceProcessRunning(): Boolean {
         return try {
             val serviceComponent = ComponentName(applicationContext, AppMonitorService::class.java)
-            val componentEnabledSetting = applicationContext.packageManager.getComponentEnabledSetting(serviceComponent)
+            val componentEnabledSetting =
+                applicationContext.packageManager.getComponentEnabledSetting(serviceComponent)
             componentEnabledSetting != PackageManager.COMPONENT_ENABLED_STATE_DISABLED
         } catch (e: Exception) {
             false

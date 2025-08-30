@@ -22,7 +22,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
@@ -33,7 +32,13 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import ru.scaik.scammaxdisabler.ui.theme.*
+import ru.scaik.scammaxdisabler.ui.theme.CrimsonAccent
+import ru.scaik.scammaxdisabler.ui.theme.CrimsonBright
+import ru.scaik.scammaxdisabler.ui.theme.CrimsonDark
+import ru.scaik.scammaxdisabler.ui.theme.CrimsonMedium
+import ru.scaik.scammaxdisabler.ui.theme.SkyBlueAccent
+import ru.scaik.scammaxdisabler.ui.theme.SkyBlueDark
+import ru.scaik.scammaxdisabler.ui.theme.SkyBlueMedium
 
 @Composable
 fun CircularPowerIndicator(
