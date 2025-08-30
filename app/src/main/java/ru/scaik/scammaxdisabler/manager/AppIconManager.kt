@@ -26,7 +26,7 @@ class AppIconManager private constructor(private val context: Context) {
             }
 
     private fun disableAllActivityAliases() {
-        IconPresetId.values().forEach { presetId ->
+        IconPresetId.entries.forEach { presetId ->
             if (presetId != IconPresetId.DEFAULT) {
                 val aliasName = buildActivityAliasName(presetId.value)
                 setComponentEnabledState(aliasName, false)

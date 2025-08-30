@@ -289,7 +289,7 @@ object BlockerUtils {
                     // Uninstall the real package first
                     val uninstallIntent =
                             Intent(Intent.ACTION_DELETE).apply {
-                                data = android.net.Uri.parse("package:$TARGET_PACKAGE_NAME")
+                                data = "package:$TARGET_PACKAGE_NAME".toUri()
                                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                             }
 
