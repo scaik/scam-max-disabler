@@ -5,7 +5,6 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.Service
 import android.content.Intent
-import android.os.Build
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import kotlinx.coroutines.CoroutineScope
@@ -66,12 +65,7 @@ class WarmUpService : Service() {
     private fun stopSelfGracefully() {
         serviceScope.launch {
             delay(GRACEFUL_STOP_DELAY_MS)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                stopForeground(Service.STOP_FOREGROUND_REMOVE)
-            } else {
-                @Suppress("DEPRECATION")
-                stopForeground(true)
-            }
+            stopForeground(Service.STOP_FOREGROUND_REMOVE)
             stopSelf()
         }
     }
@@ -84,18 +78,16 @@ class WarmUpService : Service() {
     }
 
     private fun createNotificationChannel() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val notificationManager = getSystemService(NotificationManager::class.java)
-            if (notificationManager.getNotificationChannel(NOTIFICATION_CHANNEL_ID) == null) {
-                val channel = NotificationChannel(
-                    NOTIFICATION_CHANNEL_ID,
-                    NOTIFICATION_CHANNEL_NAME,
-                    NotificationManager.IMPORTANCE_MIN
-                ).apply {
-                    setShowBadge(false)
-                }
-                notificationManager.createNotificationChannel(channel)
+        val notificationManager = getSystemService(NotificationManager::class.java)
+        if (notificationManager.getNotificationChannel(NOTIFICATION_CHANNEL_ID) == null) {
+            val channel = NotificationChannel(
+                NOTIFICATION_CHANNEL_ID,
+                NOTIFICATION_CHANNEL_NAME,
+                NotificationManager.IMPORTANCE_MIN
+            ).apply {
+                setShowBadge(false)
             }
+            notificationManager.createNotificationChannel(channel)
         }
     }
 
@@ -116,6 +108,5 @@ class WarmUpService : Service() {
         private const val NOTIFICATION_TEXT = "Инициализация службы"
         private const val SERVICE_STARTUP_DELAY_MS = 200L
         private const val GRACEFUL_STOP_DELAY_MS = 500L
-        private const val STOP_FOREGROUND_REMOVE = true
     }
 }

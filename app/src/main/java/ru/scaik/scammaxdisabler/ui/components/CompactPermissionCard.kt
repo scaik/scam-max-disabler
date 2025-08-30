@@ -146,11 +146,6 @@ fun CompactPermissionCard(
                                     HapticFeedbackType.LongPress
                                 )
                                 isExpanded = !isExpanded
-                            } else if (!isGranted && actions.isNotEmpty()) {
-                                haptics.performHapticFeedback(
-                                    HapticFeedbackType.LongPress
-                                )
-                                actions.first().second()
                             }
                         }
                     )
@@ -163,7 +158,7 @@ fun CompactPermissionCard(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Start
             ) {
-                CompactIconBox(icon = icon, isGranted = isGranted, statusColor = statusColor)
+                CompactIconBox(icon = icon, statusColor = statusColor)
 
                 Spacer(modifier = Modifier.width(12.dp))
 
@@ -285,7 +280,7 @@ fun CompactPermissionCard(
 }
 
 @Composable
-private fun CompactIconBox(icon: ImageVector, isGranted: Boolean, statusColor: Color) {
+private fun CompactIconBox(icon: ImageVector, statusColor: Color) {
     Box(contentAlignment = Alignment.Center, modifier = Modifier.size(40.dp)) {
         Box(
             modifier =

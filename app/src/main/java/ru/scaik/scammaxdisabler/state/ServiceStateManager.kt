@@ -14,8 +14,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -29,11 +27,8 @@ class ServiceStateManager private constructor(private val context: Context) {
     private val handler = Handler(Looper.getMainLooper())
 
     private val _serviceRunningState = MutableStateFlow(false)
-    val serviceRunningState: StateFlow<Boolean> = _serviceRunningState.asStateFlow()
 
     private val _accessibilityPermissionState = MutableStateFlow(false)
-    val accessibilityPermissionState: StateFlow<Boolean> =
-        _accessibilityPermissionState.asStateFlow()
 
     private var monitoringJob: Job? = null
 
@@ -68,14 +63,6 @@ class ServiceStateManager private constructor(private val context: Context) {
     fun stopMonitoring() {
         monitoringJob?.cancel()
         monitoringJob = null
-    }
-
-    fun forceServiceRestart() {
-        coroutineScope.launch {
-            withContext(Dispatchers.IO) {
-                triggerServiceRestart()
-            }
-        }
     }
 
     private suspend fun updateServiceStates() {
@@ -116,7 +103,7 @@ class ServiceStateManager private constructor(private val context: Context) {
             val componentEnabledSetting =
                 applicationContext.packageManager.getComponentEnabledSetting(serviceComponent)
             componentEnabledSetting != PackageManager.COMPONENT_ENABLED_STATE_DISABLED
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             false
         }
     }
@@ -124,7 +111,7 @@ class ServiceStateManager private constructor(private val context: Context) {
     private fun triggerServiceRestart() {
         try {
             startWarmUpService()
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             handler.postDelayed({ startWarmUpService() }, RESTART_RETRY_DELAY_MS)
         }
     }

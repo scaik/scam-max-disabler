@@ -47,11 +47,7 @@ class ScamMaxDisablerApplication : Application() {
 
         fun getInstance(context: android.content.Context): ScamMaxDisablerApplication? {
             val appContext = context.applicationContext
-            return if (appContext is ScamMaxDisablerApplication) {
-                appContext
-            } else {
-                null
-            }
+            return appContext as? ScamMaxDisablerApplication
         }
     }
 }
