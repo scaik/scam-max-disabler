@@ -6,7 +6,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import ru.scaik.scammaxdisabler.manager.AppIconManager
 import ru.scaik.scammaxdisabler.state.BlockerStateManager
+import ru.scaik.scammaxdisabler.state.IconPresetStateManager
 import ru.scaik.scammaxdisabler.state.PermissionStateManager
 import ru.scaik.scammaxdisabler.state.ServiceStateManager
 
@@ -23,6 +25,12 @@ class ScamMaxDisablerApplication : Application() {
     lateinit var permissionStateManager: PermissionStateManager
         private set
 
+    lateinit var iconPresetStateManager: IconPresetStateManager
+        private set
+
+    lateinit var appIconManager: AppIconManager
+        private set
+
     override fun onCreate() {
         super.onCreate()
         initializeManagers()
@@ -33,6 +41,8 @@ class ScamMaxDisablerApplication : Application() {
         serviceStateManager = ServiceStateManager.getInstance(this)
         blockerStateManager = BlockerStateManager.getInstance(this)
         permissionStateManager = PermissionStateManager.getInstance(this)
+        iconPresetStateManager = IconPresetStateManager.getInstance(this)
+        appIconManager = AppIconManager.getInstance(this)
     }
 
     private fun ensureServiceRunningAfterDelay() {

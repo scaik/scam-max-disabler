@@ -15,4 +15,33 @@
     <string name="blocking_dialog_error_message">%s keeps stopping</string>
     <string name="blocking_dialog_close_button">Close app</string>
     <string name="blocking_dialog_info_button">App info</string>
+
+    <!-- Icon selector strings -->
+    <string name="icon_selector_title" translatable="false">Выберите иконку</string>
+    <string name="icon_selector_apply" translatable="false">Применить</string>
+
+    <!-- Icon preset names -->
+    <string name="icon_preset_default" translatable="false">скаМ</string>
+    <string name="icon_preset_gallery">Gallery</string>
+    <string name="icon_preset_files">Files</string>
+    <string name="icon_preset_settings">Settings</string>
+    <string name="icon_preset_camera1">Camera</string>
+    <string name="icon_preset_camera2">Camera</string>
+    <string name="icon_preset_camera3">Camera</string>
+    <string name="icon_preset_vpn" translatable="false">JumboVPN</string>
+    <string name="icon_preset_one" translatable="false">Google One</string>
+    <string name="icon_preset_blockblast" translatable="false">Block Blast!</string>
+    <string name="icon_preset_standoff" translatable="false">Standoff 2</string>
+    <string name="icon_preset_wallkickers" translatable="false">Wall Kickers</string>
+    <string name="icon_preset_gmail" translatable="false">Gmail</string>
+    <string name="icon_preset_flappybird" translatable="false">Flappy Bird</string>
+    <string name="icon_preset_vk" translatable="false">VK</string>
+    <string name="icon_preset_yandexmusic">Yandex Music</string>
+    <string name="icon_preset_music">Music</string>
+    <string name="icon_preset_spotify" translatable="false">Spotify</string>
+    <string name="icon_preset_yandexbrowser">Yandex Browser</string>
+    <string name="icon_preset_chrome" translatable="false">Chrome</string>
+    <string name="icon_preset_calc1">Calculator</string>
+    <string name="icon_preset_calc2">Calculator</string>
+    <string name="icon_preset_calc3">Calculator</string>
 </resources>
