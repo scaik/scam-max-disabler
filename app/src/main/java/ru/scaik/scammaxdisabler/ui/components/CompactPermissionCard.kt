@@ -1,5 +1,6 @@
 package ru.scaik.scammaxdisabler.ui.components
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -7,6 +8,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -83,7 +85,7 @@ fun CompactPermissionCard(
             borderWidth = 0.dp
         )
 
-    androidx.compose.foundation.layout.Column(modifier = modifier.fillMaxWidth()) {
+    Column(modifier = modifier.fillMaxWidth()) {
         Box(
             modifier =
                 Modifier
@@ -129,7 +131,7 @@ fun CompactPermissionCard(
                                             alpha =
                                                 surfaceColor
                                                     .alpha *
-                                                        0.9f
+                                                    0.9f
                                         )
                                     )
                             )
@@ -140,7 +142,7 @@ fun CompactPermissionCard(
                         onClick = {
                             if (!isGranted &&
                                 (instructions != null ||
-                                        actions.isNotEmpty())
+                                    actions.isNotEmpty())
                             ) {
                                 haptics.performHapticFeedback(
                                     HapticFeedbackType.LongPress
@@ -162,7 +164,7 @@ fun CompactPermissionCard(
 
                 Spacer(modifier = Modifier.width(12.dp))
 
-                androidx.compose.foundation.layout.Column(modifier = Modifier.weight(1f)) {
+                Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = title,
                         fontSize = 14.sp,
@@ -207,15 +209,15 @@ fun CompactPermissionCard(
             }
         }
 
-        androidx.compose.animation.AnimatedVisibility(
+        AnimatedVisibility(
             visible =
                 isExpanded && (instructions != null || actions.isNotEmpty()) && !isGranted,
             enter =
                 androidx.compose.animation.expandVertically() +
-                        androidx.compose.animation.fadeIn(),
+                    androidx.compose.animation.fadeIn(),
             exit =
                 androidx.compose.animation.shrinkVertically() +
-                        androidx.compose.animation.fadeOut()
+                    androidx.compose.animation.fadeOut()
         ) {
             instructions?.let {
                 Box(
@@ -230,6 +232,7 @@ fun CompactPermissionCard(
                                     bottomEnd = 12.dp
                                 )
                             )
+                            .glassmorphicSurface(glassConfig)
                             .background(
                                 brush =
                                     Brush.verticalGradient(
@@ -240,7 +243,7 @@ fun CompactPermissionCard(
                                                     alpha =
                                                         surfaceColor
                                                             .alpha *
-                                                                0.7f
+                                                            0.9f
                                                 )
                                             )
                                     )
