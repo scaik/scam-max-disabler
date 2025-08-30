@@ -369,11 +369,7 @@ private fun PermissionCards(
                                 {
                                     openAccessibilitySettings(context)
                                 },
-                        "Открыть настройки приложения" to { openAppSettings(context) },
-                        "Инструкции для Tecno/Infinix" to
-                                {
-                                    openTecnoInfinixGuide(context)
-                                }
+                        "Открыть настройки приложения" to { openAppSettings(context) }
                     )
             )
         }
@@ -415,6 +411,10 @@ private fun PermissionCards(
                                 {
                                     openBatteryOptimizationSettings(context)
                                 },
+                        "Инструкции для Tecno/Infinix" to
+                                {
+                                    openTecnoInfinixGuide(context)
+                                }
                     )
             )
         }
