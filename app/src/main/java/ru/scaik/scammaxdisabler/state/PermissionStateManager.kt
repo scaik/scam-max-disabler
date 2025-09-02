@@ -29,9 +29,8 @@ data class PermissionState(
         get() = hasAccessibilityPermission && hasOverlayPermission
 }
 
-class PermissionStateManager private constructor(private val context: Context) {
+class PermissionStateManager(private val appContext: Context) {
 
-    private val applicationContext = context.applicationContext
     private val coroutineScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
 
     private val _accessibilityPermissionState = MutableStateFlow(false)
@@ -103,17 +102,17 @@ class PermissionStateManager private constructor(private val context: Context) {
     private fun checkAccessibilityPermission(): Boolean {
         val enabledServices =
             Settings.Secure.getString(
-                applicationContext.contentResolver,
+                appContext.contentResolver,
                 Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES
             )
                 ?: return false
 
-        val serviceComponent = ComponentName(applicationContext, AppMonitorService::class.java)
+        val serviceComponent = ComponentName(appContext, AppMonitorService::class.java)
         val expectedIdentifiers =
             listOf(
                 serviceComponent.flattenToString(),
-                "${applicationContext.packageName}/.AppMonitorService",
-                "${applicationContext.packageName}/${AppMonitorService::class.java.name}"
+                "${appContext.packageName}/.AppMonitorService",
+                "${appContext.packageName}/${AppMonitorService::class.java.name}"
             )
 
         return enabledServices.split(':').any { enabledService ->
@@ -122,7 +121,7 @@ class PermissionStateManager private constructor(private val context: Context) {
     }
 
     private fun checkOverlayPermission(): Boolean {
-        return Settings.canDrawOverlays(applicationContext)
+        return Settings.canDrawOverlays(appContext)
     }
 
     private fun checkAutoloadPermission(): Boolean {
@@ -132,11 +131,11 @@ class PermissionStateManager private constructor(private val context: Context) {
 
         return try {
             // Check if we can potentially start services on boot
-            val packageManager = applicationContext.packageManager
+            val packageManager = appContext.packageManager
             val bootPermission =
                 packageManager.checkPermission(
                     android.Manifest.permission.RECEIVE_BOOT_COMPLETED,
-                    applicationContext.packageName
+                    appContext.packageName
                 )
 
             // Basic check - if we have boot permission and foreground service permission,
@@ -150,21 +149,11 @@ class PermissionStateManager private constructor(private val context: Context) {
 
     private fun checkBatteryOptimizationIgnored(): Boolean {
         val powerManager =
-            applicationContext.getSystemService(Context.POWER_SERVICE) as PowerManager
-        return powerManager.isIgnoringBatteryOptimizations(applicationContext.packageName)
+            appContext.getSystemService(Context.POWER_SERVICE) as PowerManager
+        return powerManager.isIgnoringBatteryOptimizations(appContext.packageName)
     }
 
     companion object {
         private const val PERMISSION_CHECK_INTERVAL_MS = 2_000L
-
-        @Volatile
-        private var instance: PermissionStateManager? = null
-
-        fun getInstance(context: Context): PermissionStateManager {
-            return instance
-                ?: synchronized(this) {
-                    instance ?: PermissionStateManager(context).also { instance = it }
-                }
-        }
     }
 }

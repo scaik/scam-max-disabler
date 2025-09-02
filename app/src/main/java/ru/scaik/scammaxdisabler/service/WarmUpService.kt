@@ -14,32 +14,18 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import ru.scaik.scammaxdisabler.R
-import ru.scaik.scammaxdisabler.ScamMaxDisablerApplication
-import ru.scaik.scammaxdisabler.state.PermissionStateManager
-import ru.scaik.scammaxdisabler.state.ServiceStateManager
+import ru.scaik.scammaxdisabler.di.AppComponent
 
 class WarmUpService : Service() {
 
     private val serviceScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
-    private lateinit var serviceStateManager: ServiceStateManager
-    private lateinit var permissionStateManager: PermissionStateManager
+    private val serviceStateManager = AppComponent.serviceStateManager
+    private val permissionStateManager = AppComponent.permissionStateManager
 
     override fun onCreate() {
         super.onCreate()
-        initializeManagers()
         createNotificationChannel()
         startForeground(NOTIFICATION_ID, createForegroundNotification())
-    }
-
-    private fun initializeManagers() {
-        val application = ScamMaxDisablerApplication.getInstance(this)
-        if (application != null) {
-            serviceStateManager = application.serviceStateManager
-            permissionStateManager = application.permissionStateManager
-        } else {
-            serviceStateManager = ServiceStateManager.getInstance(this)
-            permissionStateManager = PermissionStateManager.getInstance(this)
-        }
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {

@@ -150,16 +150,4 @@ class IconPresetRepository {
             ),
         )
     }
-
-    companion object {
-        @Volatile
-        private var instance: IconPresetRepository? = null
-
-        fun getInstance(): IconPresetRepository {
-            return instance
-                ?: synchronized(this) {
-                    instance ?: IconPresetRepository().also { instance = it }
-                }
-        }
-    }
 }

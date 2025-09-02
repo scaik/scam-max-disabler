@@ -8,27 +8,19 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
-import ru.scaik.scammaxdisabler.manager.AppIconManager
-import ru.scaik.scammaxdisabler.service.ServiceRestartHelper
-import ru.scaik.scammaxdisabler.state.BlockerStateManager
-import ru.scaik.scammaxdisabler.state.IconPresetStateManager
-import ru.scaik.scammaxdisabler.state.PermissionStateManager
-import ru.scaik.scammaxdisabler.state.ServiceStateManager
+import ru.scaik.scammaxdisabler.di.AppComponent
 import ru.scaik.scammaxdisabler.ui.screens.BlockerScreen
 import ru.scaik.scammaxdisabler.ui.theme.ScamMaxDisablerTheme
 
 class MainActivity : ComponentActivity() {
 
-    internal lateinit var serviceStateManager: ServiceStateManager
-    internal lateinit var blockerStateManager: BlockerStateManager
-    internal lateinit var permissionStateManager: PermissionStateManager
-    internal lateinit var iconPresetStateManager: IconPresetStateManager
-    internal lateinit var appIconManager: AppIconManager
-    private lateinit var serviceRestartHelper: ServiceRestartHelper
+    private val blockerStateManager = AppComponent.blockerStateManager
+    private val serviceStateManager = AppComponent.serviceStateManager
+    private val permissionStateManager = AppComponent.permissionStateManager
+    private val serviceRestartHelper = AppComponent.serviceRestartHelper
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        initializeManagers()
         ensureServiceRunning()
         scheduleServiceChecks()
         enableEdgeToEdge()
@@ -37,13 +29,14 @@ class MainActivity : ComponentActivity() {
 
             ScamMaxDisablerTheme(
                     isBlockerActive = isBlockerEnabled,
-                    content = { BlockerScreen(context = this) }
+                    content = { BlockerScreen() }
             )
         }
     }
 
-    override fun onStart() {
-        super.onStart()
+    // Should re-monitor the status when the user returns to activity
+    override fun onResume() {
+        super.onResume()
         refreshAllStates()
         serviceStateManager.startMonitoring()
         permissionStateManager.startMonitoring()
@@ -55,26 +48,10 @@ class MainActivity : ComponentActivity() {
         permissionStateManager.stopMonitoring()
     }
 
-    private fun initializeManagers() {
-        val application = ScamMaxDisablerApplication.getInstance(this)
-        if (application != null) {
-            serviceStateManager = application.serviceStateManager
-            blockerStateManager = application.blockerStateManager
-            permissionStateManager = application.permissionStateManager
-            iconPresetStateManager = application.iconPresetStateManager
-            appIconManager = application.appIconManager
-        } else {
-            serviceStateManager = ServiceStateManager.getInstance(this)
-            blockerStateManager = BlockerStateManager.getInstance(this)
-            permissionStateManager = PermissionStateManager.getInstance(this)
-            iconPresetStateManager = IconPresetStateManager.getInstance(this)
-            appIconManager = AppIconManager.getInstance(this)
-        }
-        serviceRestartHelper = ServiceRestartHelper(this)
-    }
-
     private fun ensureServiceRunning() {
-        lifecycleScope.launch { serviceStateManager.ensureServiceRunning() }
+        lifecycleScope.launch {
+            serviceStateManager.ensureServiceRunning()
+        }
     }
 
     private fun scheduleServiceChecks() {

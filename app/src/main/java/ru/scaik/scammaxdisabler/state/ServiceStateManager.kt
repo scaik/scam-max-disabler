@@ -20,9 +20,7 @@ import kotlinx.coroutines.withContext
 import ru.scaik.scammaxdisabler.service.AppMonitorService
 import ru.scaik.scammaxdisabler.service.WarmUpService
 
-class ServiceStateManager private constructor(private val context: Context) {
-
-    private val applicationContext = context.applicationContext
+class ServiceStateManager(private val appContext: Context) {
     private val coroutineScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
     private val handler = Handler(Looper.getMainLooper())
 
@@ -79,15 +77,15 @@ class ServiceStateManager private constructor(private val context: Context) {
 
     private fun isAccessibilityServiceEnabled(): Boolean {
         val enabledServices = Settings.Secure.getString(
-            applicationContext.contentResolver,
+            appContext.contentResolver,
             Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES
         ) ?: return false
 
-        val serviceComponent = ComponentName(applicationContext, AppMonitorService::class.java)
+        val serviceComponent = ComponentName(appContext, AppMonitorService::class.java)
         val expectedIdentifiers = listOf(
             serviceComponent.flattenToString(),
-            "${applicationContext.packageName}/.AppMonitorService",
-            "${applicationContext.packageName}/${AppMonitorService::class.java.name}"
+            "${appContext.packageName}/.AppMonitorService",
+            "${appContext.packageName}/${AppMonitorService::class.java.name}"
         )
 
         return enabledServices.split(':').any { enabledService ->
@@ -99,9 +97,9 @@ class ServiceStateManager private constructor(private val context: Context) {
 
     private fun isServiceProcessRunning(): Boolean {
         return try {
-            val serviceComponent = ComponentName(applicationContext, AppMonitorService::class.java)
+            val serviceComponent = ComponentName(appContext, AppMonitorService::class.java)
             val componentEnabledSetting =
-                applicationContext.packageManager.getComponentEnabledSetting(serviceComponent)
+                appContext.packageManager.getComponentEnabledSetting(serviceComponent)
             componentEnabledSetting != PackageManager.COMPONENT_ENABLED_STATE_DISABLED
         } catch (_: Exception) {
             false
@@ -117,21 +115,12 @@ class ServiceStateManager private constructor(private val context: Context) {
     }
 
     private fun startWarmUpService() {
-        val intent = Intent(applicationContext, WarmUpService::class.java)
-        ContextCompat.startForegroundService(applicationContext, intent)
+        val intent = Intent(appContext, WarmUpService::class.java)
+        ContextCompat.startForegroundService(appContext, intent)
     }
 
     companion object {
         private const val SERVICE_CHECK_INTERVAL_MS = 30_000L
         private const val RESTART_RETRY_DELAY_MS = 1_000L
-
-        @Volatile
-        private var instance: ServiceStateManager? = null
-
-        fun getInstance(context: Context): ServiceStateManager {
-            return instance ?: synchronized(this) {
-                instance ?: ServiceStateManager(context).also { instance = it }
-            }
-        }
     }
 }
