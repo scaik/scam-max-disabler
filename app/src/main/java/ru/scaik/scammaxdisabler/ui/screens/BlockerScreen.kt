@@ -19,12 +19,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
 import kotlinx.coroutines.launch
-import ru.scaik.scammaxdisabler.MainActivity
-import ru.scaik.scammaxdisabler.repository.IconPresetRepository
+import ru.scaik.scammaxdisabler.di.AppComponent
 import ru.scaik.scammaxdisabler.ui.components.BlockerView
 import ru.scaik.scammaxdisabler.ui.components.BlockerViewState
 import ru.scaik.scammaxdisabler.ui.components.IconSelectorSheet
@@ -32,13 +32,13 @@ import ru.scaik.scammaxdisabler.ui.components.Permission
 import ru.scaik.scammaxdisabler.utils.BlockerUtils
 
 @Composable
-fun BlockerScreen(context: Context, modifier: Modifier = Modifier) {
-    val activity = context as MainActivity
-    val blockerStateManager = activity.blockerStateManager
-    val iconPresetStateManager = activity.iconPresetStateManager
-    val appIconManager = activity.appIconManager
+fun BlockerScreen(modifier: Modifier = Modifier) {
     val coroutineScope = rememberCoroutineScope()
-    val iconPresetRepository = IconPresetRepository.getInstance()
+    val context = LocalContext.current
+    val blockerStateManager = AppComponent.blockerStateManager
+    val iconPresetStateManager = AppComponent.iconPresetStateManager
+    val iconPresetRepository = AppComponent.iconPresetRepository
+    val appIconManager = AppComponent.appIconManager
 
     var isActiveBlockingEnabled by remember {
         mutableStateOf(blockerStateManager.isBlockerEnabled())

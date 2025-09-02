@@ -1,63 +1,42 @@
 package ru.scaik.scammaxdisabler
 
 import android.app.Application
+import android.content.Context
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import ru.scaik.scammaxdisabler.manager.AppIconManager
-import ru.scaik.scammaxdisabler.state.BlockerStateManager
-import ru.scaik.scammaxdisabler.state.IconPresetStateManager
-import ru.scaik.scammaxdisabler.state.PermissionStateManager
-import ru.scaik.scammaxdisabler.state.ServiceStateManager
+import ru.scaik.scammaxdisabler.di.AppModule
+import ru.scaik.scammaxdisabler.di.AppModuleImpl
 
 class ScamMaxDisablerApplication : Application() {
 
-    private val applicationScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
+    val applicationScope = CoroutineScope(Dispatchers.Main.immediate + SupervisorJob())
 
-    lateinit var serviceStateManager: ServiceStateManager
-        private set
-
-    lateinit var blockerStateManager: BlockerStateManager
-        private set
-
-    lateinit var permissionStateManager: PermissionStateManager
-        private set
-
-    lateinit var iconPresetStateManager: IconPresetStateManager
-        private set
-
-    lateinit var appIconManager: AppIconManager
+    lateinit var appModule: AppModule
         private set
 
     override fun onCreate() {
         super.onCreate()
-        initializeManagers()
+        appContext = this
+        appModule = AppModuleImpl(appContext = this)
         ensureServiceRunningAfterDelay()
-    }
-
-    private fun initializeManagers() {
-        serviceStateManager = ServiceStateManager.getInstance(this)
-        blockerStateManager = BlockerStateManager.getInstance(this)
-        permissionStateManager = PermissionStateManager.getInstance(this)
-        iconPresetStateManager = IconPresetStateManager.getInstance(this)
-        appIconManager = AppIconManager.getInstance(this)
     }
 
     private fun ensureServiceRunningAfterDelay() {
         applicationScope.launch {
             delay(APP_START_SERVICE_CHECK_DELAY_MS)
-            serviceStateManager.ensureServiceRunning()
+            appModule.serviceStateManager.ensureServiceRunning()
         }
     }
 
     companion object {
         private const val APP_START_SERVICE_CHECK_DELAY_MS = 500L
 
-        fun getInstance(context: android.content.Context): ScamMaxDisablerApplication? {
-            val appContext = context.applicationContext
-            return appContext as? ScamMaxDisablerApplication
-        }
+        // The application Context is safe to store in static field because it lives throughout
+        // the entire application process and will not cause memory leaks.
+        lateinit var appContext: Context
+            private set
     }
 }

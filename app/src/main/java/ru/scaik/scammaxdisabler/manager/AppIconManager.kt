@@ -8,7 +8,7 @@ import kotlinx.coroutines.withContext
 import ru.scaik.scammaxdisabler.model.IconPreset
 import ru.scaik.scammaxdisabler.model.IconPresetId
 
-class AppIconManager private constructor(private val context: Context) {
+class AppIconManager(context: Context) {
 
     private val packageManager = context.packageManager
     private val packageName = context.packageName
@@ -81,14 +81,5 @@ class AppIconManager private constructor(private val context: Context) {
 
     companion object {
         private const val MAIN_ACTIVITY_NAME = "ru.scaik.scammaxdisabler.MainActivity"
-
-        @Volatile private var instance: AppIconManager? = null
-
-        fun getInstance(context: Context): AppIconManager {
-            return instance
-                    ?: synchronized(this) {
-                        instance ?: AppIconManager(context).also { instance = it }
-                    }
-        }
     }
 }

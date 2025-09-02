@@ -6,9 +6,14 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-class BlockerStateManager private constructor(private val context: Context) {
+class BlockerStateManager(appContext: Context) {
 
-    private val applicationContext = context.applicationContext
+    private val sharedPrefs by lazy {
+        appContext.getSharedPreferences(
+            PREFERENCES_NAME,
+            Context.MODE_PRIVATE
+        )
+    }
 
     private val _blockerEnabledState = MutableStateFlow(loadBlockerEnabledState())
     val blockerEnabledState: StateFlow<Boolean> = _blockerEnabledState.asStateFlow()
@@ -61,42 +66,34 @@ class BlockerStateManager private constructor(private val context: Context) {
     }
 
     private fun loadBlockerEnabledState(): Boolean {
-        val preferences =
-                applicationContext.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE)
-        return preferences.getBoolean(KEY_BLOCKER_ENABLED, DEFAULT_BLOCKER_ENABLED)
+        return sharedPrefs.getBoolean(KEY_BLOCKER_ENABLED, DEFAULT_BLOCKER_ENABLED)
     }
 
     private fun persistBlockerEnabledState(enabled: Boolean) {
-        val preferences =
-                applicationContext.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE)
-        preferences.edit(commit = true) { putBoolean(KEY_BLOCKER_ENABLED, enabled) }
+        sharedPrefs.edit(commit = true) { putBoolean(KEY_BLOCKER_ENABLED, enabled) }
     }
 
     private fun loadInstallationBlockingEnabledState(): Boolean {
-        val preferences =
-                applicationContext.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE)
-        return preferences.getBoolean(
-                KEY_INSTALLATION_BLOCKING_ENABLED,
-                DEFAULT_INSTALLATION_BLOCKING_ENABLED
+        return sharedPrefs.getBoolean(
+            KEY_INSTALLATION_BLOCKING_ENABLED,
+            DEFAULT_INSTALLATION_BLOCKING_ENABLED
         )
     }
 
     private fun persistInstallationBlockingEnabledState(enabled: Boolean) {
-        val preferences =
-                applicationContext.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE)
-        preferences.edit(commit = true) { putBoolean(KEY_INSTALLATION_BLOCKING_ENABLED, enabled) }
+        sharedPrefs.edit(commit = true) {
+            putBoolean(KEY_INSTALLATION_BLOCKING_ENABLED, enabled)
+        }
     }
 
     private fun loadCurrentMode(): Boolean {
-        val preferences =
-                applicationContext.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE)
-        return preferences.getBoolean(KEY_CURRENT_MODE, DEFAULT_CURRENT_MODE)
+        return sharedPrefs.getBoolean(KEY_CURRENT_MODE, DEFAULT_CURRENT_MODE)
     }
 
     private fun persistCurrentMode(isInstallationMode: Boolean) {
-        val preferences =
-                applicationContext.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE)
-        preferences.edit(commit = true) { putBoolean(KEY_CURRENT_MODE, isInstallationMode) }
+        sharedPrefs.edit(commit = true) {
+            putBoolean(KEY_CURRENT_MODE, isInstallationMode)
+        }
     }
 
     companion object {
@@ -108,14 +105,5 @@ class BlockerStateManager private constructor(private val context: Context) {
         private const val DEFAULT_INSTALLATION_BLOCKING_ENABLED = false
         private const val DEFAULT_CURRENT_MODE =
                 false // false = active blocking, true = installation blocking
-
-        @Volatile private var instance: BlockerStateManager? = null
-
-        fun getInstance(context: Context): BlockerStateManager {
-            return instance
-                    ?: synchronized(this) {
-                        instance ?: BlockerStateManager(context).also { instance = it }
-                    }
-        }
     }
 }

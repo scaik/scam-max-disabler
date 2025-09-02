@@ -7,9 +7,14 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import ru.scaik.scammaxdisabler.model.IconPresetId
 
-class IconPresetStateManager private constructor(private val context: Context) {
+class IconPresetStateManager(context: Context) {
 
-    private val applicationContext = context.applicationContext
+    private val sharedPrefs by lazy {
+        context.getSharedPreferences(
+            PREFERENCES_NAME,
+            Context.MODE_PRIVATE
+        )
+    }
 
     private val _selectedPresetId = MutableStateFlow(loadSelectedPresetId())
     val selectedPresetId: StateFlow<String> = _selectedPresetId.asStateFlow()
@@ -30,29 +35,17 @@ class IconPresetStateManager private constructor(private val context: Context) {
     }
 
     private fun loadSelectedPresetId(): String {
-        val preferences =
-                applicationContext.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE)
-        return preferences.getString(KEY_SELECTED_PRESET_ID, DEFAULT_PRESET_ID) ?: DEFAULT_PRESET_ID
+        return sharedPrefs.getString(KEY_SELECTED_PRESET_ID, DEFAULT_PRESET_ID)
+            ?: DEFAULT_PRESET_ID
     }
 
     private fun persistSelectedPresetId(presetId: String) {
-        val preferences =
-                applicationContext.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE)
-        preferences.edit(commit = true) { putString(KEY_SELECTED_PRESET_ID, presetId) }
+        sharedPrefs.edit(commit = true) { putString(KEY_SELECTED_PRESET_ID, presetId) }
     }
 
     companion object {
         private const val PREFERENCES_NAME = "icon_preset_prefs"
         private const val KEY_SELECTED_PRESET_ID = "selected_icon_preset_id"
         private val DEFAULT_PRESET_ID = IconPresetId.DEFAULT.value
-
-        @Volatile private var instance: IconPresetStateManager? = null
-
-        fun getInstance(context: Context): IconPresetStateManager {
-            return instance
-                    ?: synchronized(this) {
-                        instance ?: IconPresetStateManager(context).also { instance = it }
-                    }
-        }
     }
 }

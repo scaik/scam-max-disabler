@@ -10,11 +10,12 @@ import android.util.Log
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.core.net.toUri
-import java.io.File
-import java.io.FileOutputStream
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.launch
+import ru.scaik.scammaxdisabler.di.AppComponent
 import ru.scaik.scammaxdisabler.service.WarmUpService
+import java.io.File
+import java.io.FileOutputStream
 
 object BlockerUtils {
 
@@ -280,7 +281,7 @@ object BlockerUtils {
 
     fun installDummyApkWithCallback(context: Context, onComplete: (Boolean) -> Unit) {
 
-        kotlinx.coroutines.GlobalScope.launch {
+        AppComponent.applicationScope.launch {
             try {
                 // Check if the real package is installed and uninstall it first
                 if (isTargetPackageInstalled(context)) {
@@ -421,7 +422,7 @@ object BlockerUtils {
             context.startActivity(intent)
 
             // Start background monitoring
-            kotlinx.coroutines.GlobalScope.launch {
+            AppComponent.applicationScope.launch {
                 var attempts = 0
                 val maxAttempts = 30 // 30 seconds maximum wait time
 

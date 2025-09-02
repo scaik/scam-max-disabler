@@ -10,14 +10,12 @@ import android.view.WindowManager
 import android.view.accessibility.AccessibilityEvent
 import androidx.core.net.toUri
 import ru.scaik.scammaxdisabler.R
-import ru.scaik.scammaxdisabler.ScamMaxDisablerApplication
-import ru.scaik.scammaxdisabler.state.BlockerStateManager
-import ru.scaik.scammaxdisabler.state.ServiceStateManager
+import ru.scaik.scammaxdisabler.di.AppComponent
 
 class AppMonitorService : AccessibilityService() {
 
-    private lateinit var blockerStateManager: BlockerStateManager
-    private lateinit var serviceStateManager: ServiceStateManager
+    private val blockerStateManager = AppComponent.blockerStateManager
+    private val serviceStateManager = AppComponent.serviceStateManager
     private val mainHandler = Handler(Looper.getMainLooper())
 
     private var lastBlockedTimestamp = 0L
@@ -25,19 +23,7 @@ class AppMonitorService : AccessibilityService() {
 
     override fun onCreate() {
         super.onCreate()
-        initializeManagers()
         notifyServiceStarted()
-    }
-
-    private fun initializeManagers() {
-        val application = ScamMaxDisablerApplication.getInstance(this)
-        if (application != null) {
-            blockerStateManager = application.blockerStateManager
-            serviceStateManager = application.serviceStateManager
-        } else {
-            blockerStateManager = BlockerStateManager.getInstance(this)
-            serviceStateManager = ServiceStateManager.getInstance(this)
-        }
     }
 
     private fun notifyServiceStarted() {
