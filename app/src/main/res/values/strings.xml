@@ -44,4 +44,7 @@
     <string name="icon_preset_calc1">Calculator</string>
     <string name="icon_preset_calc2">Calculator</string>
     <string name="icon_preset_calc3">Calculator</string>
+
+
+    <string name="xposed_module_description">Модуль который вызывает краш приложения MAX</string>
 </resources>
