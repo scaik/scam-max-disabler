@@ -23,4 +23,6 @@
     <string name="icon_preset_calc2">Калькулятор</string>
     <string name="icon_preset_calc3">Калькулятор</string>
     <string name="icon_preset_camera3">Камера</string>
+
+    <string name="xposed_module_description">Модуль который вызывает краш приложения MAX</string>
 </resources>
